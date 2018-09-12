@@ -304,7 +304,7 @@ class DaumMovieTvAgent(Agent.TV_Shows):
     Log.Info("in update ID = %s" % metadata.id)
     #updateDaumMovie('tv', metadata)
     from tv import updateTV
-    searchTV(metadata, media)
+    updateTV(metadata, media)
 
     # override metadata ID
     if Prefs['override_tv_id'] != 'None':
