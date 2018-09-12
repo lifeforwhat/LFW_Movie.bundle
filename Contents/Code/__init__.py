@@ -296,11 +296,15 @@ class DaumMovieTvAgent(Agent.TV_Shows):
   accepts_from = ['com.plexapp.agents.localmedia']
 
   def search(self, results, media, lang, manual=False):
-    return searchDaumMovie('tv', results, media, lang)
+    #return searchDaumMovie('tv', results, media, lang)
+    from tv import searchTV
+    return searchTV(results, media, lang)
 
   def update(self, metadata, media, lang):
     Log.Info("in update ID = %s" % metadata.id)
-    updateDaumMovie('tv', metadata)
+    #updateDaumMovie('tv', metadata)
+    from tv import updateTV
+    searchTV(metadata, media)
 
     # override metadata ID
     if Prefs['override_tv_id'] != 'None':
