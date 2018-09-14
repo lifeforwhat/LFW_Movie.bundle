@@ -103,7 +103,7 @@ def updateTV(metadata, media):
 				roles.append(entity)
 			elif entity['role'].find(u'감독') != -1 or entity['role'].find(u'연출') != -1:
 				directors.append(entity)
-			elif entity['role'].find(u'제작') != -1:
+			elif entity['role'].find(u'제작') != -1 or entity['role'].find(u'기획') != -1 or entity['role'].find(u'책임프로듀서') != -1:
 				producers.append(entity)
 			elif entity['role'].find(u'극본') != -1 or entity['role'].find(u'각본') != -1:
 				writers.append(entity)
@@ -121,30 +121,42 @@ def updateTV(metadata, media):
 	########################################## 에피소드
 	pageUrl = "http://127.0.0.1:32400/library/metadata/%s/tree" % media.id
 	date_list = {}
-	data = HTTP.Request(pageUrl).content
-	filename_match = re.findall('\"file\"\:\".*?\"', data)
-	for file in filename_match:
-		for r in ['.*?(?P<year>\d{2})(?P<month>\d{2})(?P<day>\d{2})', '.*?(?P<year>\d{2,4})(\-|\.|\s)(?P<month>\d{1,2})(\-|\.|\s)(?P<day>\d{1,2})']:
-			match = re.search(r, file)
+	no_list = {}
+	try:
+		data = HTTP.Request(pageUrl).content
+		filename_match = re.findall('\"file\"\:\".*?\"', data)
+		for file in filename_match:
+			for r in ['.*?(?P<year>\d{2})(?P<month>\d{2})(?P<day>\d{2})', '.*?(?P<year>\d{2,4})(\-|\.|\s)(?P<month>\d{1,2})(\-|\.|\s)(?P<day>\d{1,2})']:
+				match = re.search(r, file)
+				if match:
+					if len(match.group('year')) == 4: date_list['%s%s%s' % (match.group('year'), match.group('month'), match.group('day'))] = None
+					else:
+						if int(match.group('year')) < 50: date_list['20%s%s%s' % (match.group('year'), match.group('month'), match.group('day'))] = None
+						else: date_list['19%s%s%s' % (match.group('year'), match.group('month'), match.group('day'))] = None
+			match = re.search('E(?P<no>\d+)', file)
 			if match:
-				if len(match.group('year')) == 4: date_list['%s%s%s' % (match.group('year'), match.group('month'), match.group('day'))] = None
-				else:
-					if int(match.group('year')) < 50: date_list['20%s%s%s' % (match.group('year'), match.group('month'), match.group('day'))] = None
-					else: date_list['19%s%s%s' % (match.group('year'), match.group('month'), match.group('day'))] = None
-	episode_date_list = []
+				no_list[match.group('no')] = None
+	except:
+		Log('DATELIST MAKE ERROR')
+		date_list = {}
 	episode_url_list = []
 	items = root.xpath('//*[@id="clipDateList"]/li')
 	for item in items:
-		a_tag = item.xpath('a')
+		a_tag = item.xpath('a') 
 		if len(a_tag) == 1:
-			episode_date_list.append(item.attrib['data-clip'])
 			query = 'https://search.daum.net/search%s' % a_tag[0].attrib['href']
-			episode_url_list.append(query)
+			if len(date_list) == 0: episode_url_list.append(query)
+			else:
+				if item.attrib['data-clip'] in date_list:
+					episode_url_list.append(query)
+				else:
+					s = a_tag[0].attrib['onclick']
+					match = re.search('\&r\=(?P<no>\d+)', s)
+					if match:
+						if match.group('no') in no_list: episode_url_list.append(query)
 
 	count = len(episode_url_list)
 	for i in range(count-1, -1, -1):
-		if episode_date_list[i] not in date_list: continue
-		Log('%s : %s' % (i, episode_url_list[i]))
 		request = urllib2.Request(episode_url_list[i])
 		request.add_header('user-agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.92 Safari/537.36')
 		response = urllib2.urlopen(request) 
@@ -182,9 +194,9 @@ def updateTV(metadata, media):
 				if title !='None': 
 					episode.title = '%s %s' % (episode.title, title)
 					#summary = '%s\r\n%s' % (title, unicodedata.normalize('NFKC', unicode(tmp[0].tail)).strip())
-					Log('summary %s' % summary)
+					#Log('summary %s' % summary)
 		summary2 = '\r\n'.join(txt.strip() for txt in root.xpath('//p[@class="episode_desc"]/text()'))
-		Log('summary2 %s' % summary2)
+		#Log('summary2 %s' % summary2)
 			#tmp = items[0].xpath('br')
 			#for t in tmp:
 			#	summary += '\r\n%s' % unicodedata.normalize('NFKC', unicode(t.tail)).strip()
