@@ -3,6 +3,7 @@ import urllib, unicodedata
 import urllib2
 import lxml
 import re
+import json, io, traceback
 
 def searchTV(results, media, lang):
 	media_name = media.show
@@ -133,9 +134,12 @@ def updateTV(metadata, media):
 					else:
 						if int(match.group('year')) < 50: date_list['20%s%s%s' % (match.group('year'), match.group('month'), match.group('day'))] = None
 						else: date_list['19%s%s%s' % (match.group('year'), match.group('month'), match.group('day'))] = None
+						date_match = match
+
 			match = re.search('E(?P<no>\d+)', file)
 			if match:
 				no_list[match.group('no')] = None
+
 	except:
 		Log('DATELIST MAKE ERROR')
 		date_list = {}
@@ -155,6 +159,33 @@ def updateTV(metadata, media):
 					if match:
 						if match.group('no') in no_list: episode_url_list.append(query)
 
+	metadata.summary = '%s\r\n\r\nDaum:%s    Match:%s' % (metadata.summary, len(items), len(episode_url_list))
+	Log(metadata.summary)
+
+	#### Make JSON for scanner and file_manager ###########################
+	try:
+		#if True:
+		if len(items) == 0:
+			#Log('print (os.getcwd()) %s' % os.getcwd()) #Plex Media Server\Plug-in Support\Data\com.plexapp.agents.daum_tv_series
+
+			json_file = os.path.join( os.getcwd(), 'data.json' )
+			if os.path.isfile(json_file) :
+				with io.open('data.json', 'r', encoding='utf-8') as data_file:    
+					data = json.load(data_file)
+			else: data = {}
+
+			if 'no_episode_data' not in data : data['no_episode_data'] = {}
+			if media.title.encode('utf8') not in data['no_episode_data']: data['no_episode_data'][media.title.encode('utf8')] = media.id
+
+			with io.open(json_file, 'w', encoding="utf-8") as make_file:
+				json_str = json.dumps(data, ensure_ascii=False).decode('utf-8')
+				Log(json_str)
+				make_file.write(json_str)
+	except:
+		Log('make json error!!!')
+		Log(traceback.format_exc())
+
+	##########################################
 	count = len(episode_url_list)
 	for i in range(count-1, -1, -1):
 		request = urllib2.Request(episode_url_list[i])
