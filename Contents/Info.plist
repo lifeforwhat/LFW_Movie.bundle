@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>CFBundleIdentifier</key>
-	<string>com.plexapp.agents.daum_movie</string>
+	<string>com.plexapp.agents.sj_daum</string>
 	<key>PlexAgentAttributionText</key>
 	<string>
 		&lt;a href=&quot;http://movie.daum.net/&quot;&gt;Daum Movie&lt;/a&gt;
