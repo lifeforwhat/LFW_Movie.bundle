@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 # Daum Movie
-
+ 
 import urllib, unicodedata
 
 DAUM_MOVIE_SRCH   = "http://movie.daum.net/data/movie/search/v2/%s.json?size=20&start=1&searchText=%s"
@@ -21,7 +21,7 @@ RE_YEAR_IN_NAME   =  Regex('\((\d+)\)')
 RE_MOVIE_ID       =  Regex("movieId=(\d+)")
 RE_TV_ID          =  Regex("tvProgramId=(\d+)")
 RE_PHOTO_SIZE     =  Regex("/C\d+x\d+/")
-RE_IMDB_ID        =  Regex("/(tt\d+)/")
+RE_IMDB_ID        =  Regex("/(tt\d+)/") 
 
 def Start():
   HTTP.CacheTime = CACHE_1HOUR * 12
@@ -265,8 +265,8 @@ def updateDaumMovie(cate, metadata):
     #     metadata.original_title = match.group(1).strip()
 
 ####################################################################################################
-class DaumMovieAgent(Agent.Movies):
-  name = "Daum Movie"
+class SJ_DaumMovieAgent(Agent.Movies):
+  name = "SJ Daum" 
   languages = [Locale.Language.Korean]
   primary_provider = True
   accepts_from = ['com.plexapp.agents.localmedia']
@@ -289,8 +289,8 @@ class DaumMovieAgent(Agent.Movies):
           metadata.id = match.group(1)
           Log.Info("override with IMDB ID, %s" % metadata.id)
 
-class DaumMovieTvAgent(Agent.TV_Shows):
-  name = "Daum Movie"
+class SJ_DaumTvAgent(Agent.TV_Shows):
+  name = "SJ Daum"
   primary_provider = True
   languages = [Locale.Language.Korean]
   accepts_from = ['com.plexapp.agents.localmedia']
@@ -315,4 +315,4 @@ class DaumMovieTvAgent(Agent.TV_Shows):
         node = xml.xpath('/Data/Series/seriesid')
         if node:
           metadata.id = node[0].text
-          Log.Info("override with TVDB ID, %s" % metadata.id)
+          Log.Info("override with TVDB ID, %s" % metadata.id) 
