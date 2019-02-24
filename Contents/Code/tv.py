@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-import urllib, unicodedata
+import os, urllib, unicodedata
 
 def searchTV(results, media, lang):
     media_name = media.show
@@ -22,9 +22,7 @@ def updateTV(metadata, media):
         Log('TITLE2 : %s' % title)
         metadata.title = title
 
-
     items = root.xpath('//*[@id="tv_program"]/div[1]/div[3]/span')
-    
     if items:
         studio = unicodedata.normalize('NFKC', unicode(items[0].text)).strip()
         Log('studio : %s' % studio)
@@ -122,6 +120,31 @@ def updateTV(metadata, media):
             meta.name = e['name'] if 'name' in e else ''
             meta.photo = e['photo'] if 'photo' in e else ''
 
+    ##############################################################
+    # 2019-02-24. 다시 있는 에피소드만 가져오도록 한다. 
+    parts = media.all_parts()
+    episode_no_list = []
+    episode_date_list = []
+    for p in parts:
+        tmp = os.path.basename(p.file)
+        match = Regex(r'([sS](?P<season>[0-9]{1,2}))?[eE](?P<ep>[0-9]{1,4})').search(tmp)
+        if match:
+            value = int(match.group('ep'))
+            if value not in episode_no_list:
+                episode_no_list.append(value)
+        for regex in [
+            r'[^0-9a-zA-Z](?P<year>[0-9]{2})(?P<month>[0-9]{2})(?P<day>[0-9]{2})[^0-9a-zA-Z]', # 6자리
+            r'(?P<year>[0-9]{4})[^0-9a-zA-Z]+(?P<month>[0-9]{2})[^0-9a-zA-Z]+(?P<day>[0-9]{2})([^0-9]|$)',  # 2009-02-10 
+        ]:
+            match = Regex(regex).search(tmp)
+            if match:
+                value = '%s%s%s' % (match.group('year'), match.group('month'), match.group('day'))
+                if value not in episode_date_list:
+                    episode_date_list.append(value)
+                    break
+    Log('episode_no_list : %s', len(episode_no_list))
+    Log('episode_date_list : %s', len(episode_date_list))
+
     episode_url_list = []
     items = root.xpath('//*[@id="clipDateList"]/li')
     if len(items) > 300: items = items[len(items)-300:]
@@ -129,21 +152,30 @@ def updateTV(metadata, media):
         a_tag = item.xpath('a') 
         if len(a_tag) == 1:
             query = 'https://search.daum.net/search%s' % a_tag[0].attrib['href']
-            episode_url_list.append(query)
-    metadata.summary = '%s\r\n\r\nDaum:%s' % (metadata.summary, len(episode_url_list))
+            if item.attrib['data-clip'] in episode_date_list:
+                episode_url_list.append(query)
+            else:
+                s = a_tag[0].attrib['onclick']
+                match = Regex(r'\&r\=(?P<no>\d+)').search(s)
+                if match:
+                    if int(match.group('no')) in episode_no_list: 
+                        episode_url_list.append(query)
+    metadata.summary = '%s\r\n\r\nDaum:%s Match:%s' % (metadata.summary, len(items), len(episode_url_list))
+    ##############################################################
 
     count = len(episode_url_list)
+    Log('episode tag len : %s', count)
     for i in range(count-1, -1, -1):
         root = HTML.ElementFromURL(episode_url_list[i])
         items = root.xpath('//div[@class="tit_episode"]')
+        episode = None
         if len(items) == 1:
-            tmp = items[0].xpath('strong') 
+            tmp = items[0].xpath('strong')
             if len(tmp) == 1:
                 episode_frequency = unicodedata.normalize('NFKC', unicode(tmp[0].text)).strip()
-                episode_summary = episode_frequency
                 match = Regex(r'(\d+)').search(episode_frequency)
                 if match:
-                    Log('episode_frequency : %s' % match.group(1))
+                    Log('episode_frequency : %s i:%s', match.group(1), i)
                     episode = metadata.seasons['1'].episodes[int(match.group(1))]
                 else: 
                     Log('episode_frequency not matched!!!')
@@ -160,7 +192,6 @@ def updateTV(metadata, media):
             if len(tmp) == 1:
                 date2 = unicodedata.normalize('NFKC', unicode(tmp[0].text)).strip()
                 episode.title = '%s %s' % (date1, date2)
-            
         items = root.xpath('//p[@class="episode_desc"]')
         if len(items) == 1:
             tmp = items[0].xpath('strong')
