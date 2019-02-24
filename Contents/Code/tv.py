@@ -19,21 +19,33 @@ def updateTV(metadata, media):
     items = root.xpath('//*[@id="tv_program"]/div[1]/div[2]/strong')
     if len(items) == 1:
         title = unicodedata.normalize('NFKC', unicode(items[0].text)).strip()
-        Log('TITLE : %s' % title)
+        Log('TITLE2 : %s' % title)
         metadata.title = title
 
-    items = root.xpath('//*[@id="tv_program"]/div[1]/div[3]/span')
-    studio = unicodedata.normalize('NFKC', unicode(items[0].text)).strip()
-    Log('studio : %s' % studio)
-    metadata.studio = studio
 
-    summary = ''
-    for item in items:
-        summary += unicodedata.normalize('NFKC', unicode(item.text)).strip()#.encode('euc-kr')
-        summary += ' '
-    match = Regex(r'(\d{4}\.\d{1,2}\.\d{1,2})~').search(summary)
-    if match:
-        metadata.originally_available_at = Datetime.ParseDate(match.group(1)).date()
+    items = root.xpath('//*[@id="tv_program"]/div[1]/div[3]/span')
+    
+    if items:
+        studio = unicodedata.normalize('NFKC', unicode(items[0].text)).strip()
+        Log('studio : %s' % studio)
+        metadata.studio = studio
+        summary = ''    
+        for item in items:
+            summary += unicodedata.normalize('NFKC', unicode(item.text)).strip()#.encode('euc-kr')
+            summary += ' '
+        match = Regex(r'(\d{4}\.\d{1,2}\.\d{1,2})~').search(summary)
+        if match:
+            metadata.originally_available_at = Datetime.ParseDate(match.group(1)).date()
+    else:
+        url2 = url.replace('w=tv&', '') 
+        root2 = HTML.ElementFromURL(url2)
+        items2 = root2.xpath('//*[@id="tvpColl"]/div[2]/div/div[1]/div')
+        tmp = items2[0].text_content().strip()
+        summary = tmp + u' 방송종료'
+        metadata.studio = tmp.split(' ')[0]
+        match = Regex(r'(\d{4}\.\d{1,2}\.\d{1,2})~').search(tmp)
+        if match:
+            metadata.originally_available_at = Datetime.ParseDate(match.group(1)).date()
 
     metadata.genres.clear()
     items = root.xpath('//*[@id="tv_program"]/div[1]/dl[1]/dd')
@@ -63,6 +75,7 @@ def updateTV(metadata, media):
     roles = []
     for i in range(1,3):
         items = root.xpath('//*[@id="tv_casting"]/div[%s]/ul//li' % i)
+        Log('CASTING ITEM LEN : %s' % len(items))
         for item in items:
             entity = {}
             entity['type'] = ''
