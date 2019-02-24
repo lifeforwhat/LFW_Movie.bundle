@@ -13,6 +13,7 @@ def searchTV(results, media, lang):
     if id: results.Append(MetadataSearchResult(id=id, name=title, year='', score=100, lang=lang))
 
 def updateTV(metadata, media):
+    #flag_ending = False
     url = 'https://search.daum.net/search?w=tv&q=%s&irk=%s&irt=tv-program&DA=TVP' % (urllib.quote(media.title.encode('utf8')), metadata.id)
     Log('LOG : %s ' % url)
     root = HTML.ElementFromURL(url)
@@ -35,6 +36,7 @@ def updateTV(metadata, media):
         if match:
             metadata.originally_available_at = Datetime.ParseDate(match.group(1)).date()
     else:
+        #flag_ending = True
         url2 = url.replace('w=tv&', '') 
         root2 = HTML.ElementFromURL(url2)
         items2 = root2.xpath('//*[@id="tvpColl"]/div[2]/div/div[1]/div')
@@ -125,6 +127,8 @@ def updateTV(metadata, media):
     parts = media.all_parts()
     episode_no_list = []
     episode_date_list = []
+    #if flag_ending and parts[0].file.find(u'종영') == -1:
+    #    metadata.title = u'[종영]%s' % metadata.title
     for p in parts:
         tmp = os.path.basename(p.file)
         match = Regex(r'([sS](?P<season>[0-9]{1,2}))?[eE](?P<ep>[0-9]{1,4})').search(tmp)
@@ -138,28 +142,29 @@ def updateTV(metadata, media):
         ]:
             match = Regex(regex).search(tmp)
             if match:
-                value = '%s%s%s' % (match.group('year'), match.group('month'), match.group('day'))
+                value = '%s%s%s' % (match.group('year')[-2:], match.group('month'), match.group('day'))
                 if value not in episode_date_list:
                     episode_date_list.append(value)
                     break
     Log('episode_no_list : %s', len(episode_no_list))
     Log('episode_date_list : %s', len(episode_date_list))
-
     episode_url_list = []
     items = root.xpath('//*[@id="clipDateList"]/li')
     if len(items) > 300: items = items[len(items)-300:]
     for item in items:
         a_tag = item.xpath('a') 
-        if len(a_tag) == 1:
-            query = 'https://search.daum.net/search%s' % a_tag[0].attrib['href']
-            if item.attrib['data-clip'] in episode_date_list:
-                episode_url_list.append(query)
-            else:
-                s = a_tag[0].attrib['onclick']
-                match = Regex(r'\&r\=(?P<no>\d+)').search(s)
-                if match:
-                    if int(match.group('no')) in episode_no_list: 
-                        episode_url_list.append(query)
+        if len(a_tag) != 1:
+            continue
+        query = 'https://search.daum.net/search%s' % a_tag[0].attrib['href']
+        if item.attrib['data-clip'][-6:] in episode_date_list:
+            episode_url_list.append(query)
+        else:
+            # r 뒤의 번호는 회차가 아님
+            #match = Regex(r'\&r\=(?P<no>\d+)').search(a_tag[0].attrib['onclick'])
+            match = Regex(ur'(?P<no>\d+)회').search(a_tag[0].text_content().strip())
+            if match:
+                if int(match.group('no')) in episode_no_list: 
+                    episode_url_list.append(query)
     metadata.summary = '%s\r\n\r\nDaum:%s Match:%s' % (metadata.summary, len(items), len(episode_url_list))
     ##############################################################
 
