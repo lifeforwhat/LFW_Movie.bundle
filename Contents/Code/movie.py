@@ -11,7 +11,8 @@ def searchMovie(results, media, lang):
         tmps = item.split('|')
         score = 95 - (index*5)
         if tmps[3] == media.year:
-            score += 5
+            #score += 5
+            score = 100
         if score < 10:
             score = 10
         results.Append(MetadataSearchResult(id=tmps[1], name=tmps[0], year=tmps[3], score=score, lang=lang))

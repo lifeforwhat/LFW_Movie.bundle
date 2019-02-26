@@ -189,6 +189,7 @@ def updateTV(metadata, media):
                 Log('episode is None')
                 continue
             tmp = items[0].xpath('span[@class="txt_date "]')
+            date1 = ''
             if len(tmp) == 1:
                 date1 = unicodedata.normalize('NFKC', unicode(tmp[0].text)).strip()
                 episode.originally_available_at = Datetime.ParseDate(date1.split('(')[0]).date()
@@ -196,7 +197,7 @@ def updateTV(metadata, media):
             tmp = items[0].xpath('span[@class="txt_date"]')
             if len(tmp) == 1:
                 date2 = unicodedata.normalize('NFKC', unicode(tmp[0].text)).strip()
-                episode.title = '%s %s' % (date1, date2)
+                episode.title = ('%s %s' % (date1, date2)).strip()
         items = root.xpath('//p[@class="episode_desc"]')
         if len(items) == 1:
             tmp = items[0].xpath('strong')
