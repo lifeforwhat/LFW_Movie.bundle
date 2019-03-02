@@ -13,7 +13,7 @@ def searchTV(results, media, lang):
     flag_media_season = False
     if len(media.seasons) > 1:
         for media_season_index in media.seasons:
-            if int(media_season_index) > 1:
+            if int(media_season_index) > 1 and int(media_season_index) < 1900:
                 flag_media_season = True
                 break
     Log('SEARCH : %s' % media.show)
@@ -51,7 +51,7 @@ def updateTV(metadata, media):
     flag_media_season = False
     if len(media.seasons) > 1:
         for media_season_index in media.seasons:
-            if int(media_season_index) > 1:
+            if int(media_season_index) > 1 and int(media_season_index) < 1900:
                 flag_media_season = True
                 break
     data = get_show_list(media.title)
@@ -65,7 +65,7 @@ def updateTV(metadata, media):
         Log('media_season_index is %s', media_season_index)
         if media_season_index == '0':
             continue
-        search_title = media.title
+        search_title = media.title.replace(u'[종영]', '')
         search_id = metadata.id            
         if flag_media_season and len(data['series']) > 1:
             search_title = data['series'][int(media_season_index)-1]['title']

@@ -68,7 +68,7 @@ class DaumTV(object):
                         dic['title'] = tag.text
                         dic['id'] = re.compile(r'irk\=(?P<id>\d+)').search(tag.attrib['href']).group('id')
                     elif tag.tag == 'span':
-                        match = re.compile(r'\((?P<studio>.*?),\s*(?P<year>\d{4})\)').search(tag.text)
+                        match = re.compile(r'\((?P<studio>.*?),\s*(?P<year>\d{4})?\)').search(tag.text)
                         if match:
                             dic['studio'] = match.group('studio')
                             dic['year'] = match.group('year')
