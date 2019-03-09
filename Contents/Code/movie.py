@@ -10,9 +10,10 @@ def searchMovie(results, media, lang):
     for index, item in enumerate(data['items']['movie']):
         tmps = item.split('|')
         score = 95 - (index*5)
-        if tmps[3] == media.year:
-            #score += 5
+        if media.name == tmps[0] and tmps[3] == media.year:
             score = 100
+        elif tmps[3] == media.year:
+            score = score + 5
         if score < 10:
             score = 10
         results.Append(MetadataSearchResult(id=tmps[1], name=tmps[0], year=tmps[3], score=score, lang=lang))
