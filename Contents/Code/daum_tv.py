@@ -19,6 +19,9 @@ class DaumTV(object):
                 return
             entity = {}
             entity['title'] = tags[0].text
+            match = re.compile(r'q\=(?P<title>.*?)&').search(tags[0].attrib['href'])
+            if match:
+                entity['title'] = urllib.unquote(match.group('title'))
             entity['id'] = re.compile(r'irk\=(?P<id>\d+)').search(tags[0].attrib['href']).group('id')
 
             entity['status'] = 1  
@@ -44,7 +47,22 @@ class DaumTV(object):
             entity['series'] = []
             entity['series'].append({'title':entity['title'], 'id' : entity['id'], 'year' : entity['year']})
             tags = root.xpath('//*[@id="tv_series"]/div/ul/li')
+
             if tags:
+                # 2019-03-05 시리즈 더보기 존재시
+                try:
+                    more = root.xpath('//*[@id="tv_series"]/div/div/a')
+                    url = more[0].attrib['href']
+                    if not url.startswith('http'):
+                        url = 'https://search.daum.net/search%s' % url
+                    Log('MORE URL : %s', url)
+                    if more[0].xpath('span')[0].text == u'시리즈 더보기':
+                        more_root = HTML.ElementFromURL(url)
+                        tags = more_root.xpath('//*[@id="series"]/ul/li')
+                except Exception as e:
+                    log('Not More!')
+                    log(traceback.format_exc())
+
                 for tag in tags:
                     dic = {}
                     dic['title'] = tag.xpath('a')[0].text
