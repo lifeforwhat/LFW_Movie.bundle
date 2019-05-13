@@ -15,14 +15,17 @@ class DaumTV(object):
     def get_show_info_on_home(root):
         try:
             tags = root.xpath('//*[@id="tvpColl"]/div[2]/div/div[1]/span/a')
-            if len(tags) != 1:
+            # 2019-05-13
+            #일밤- 미스터리 음악쇼 복면가왕 A 태그 2개
+            if len(tags) < 1:
                 return
+            tag_index = len(tags)-1
             entity = {}
-            entity['title'] = tags[0].text
-            match = re.compile(r'q\=(?P<title>.*?)&').search(tags[0].attrib['href'])
+            entity['title'] = tags[tag_index].text
+            match = re.compile(r'q\=(?P<title>.*?)&').search(tags[tag_index].attrib['href'])
             if match:
                 entity['title'] = urllib.unquote(match.group('title'))
-            entity['id'] = re.compile(r'irk\=(?P<id>\d+)').search(tags[0].attrib['href']).group('id')
+            entity['id'] = re.compile(r'irk\=(?P<id>\d+)').search(tags[tag_index].attrib['href']).group('id')
 
             entity['status'] = 1  
             tags = root.xpath('//*[@id="tvpColl"]/div[2]/div/div[1]/span/span')
