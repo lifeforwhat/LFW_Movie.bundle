@@ -47,7 +47,7 @@ def searchTV(results, media, lang):
 
 def updateTV(metadata, media):
     # media : Framework.api.agentkit.MediaTree
-    #flag_ending = False
+    flag_ending = False
     flag_media_season = False
     if len(media.seasons) > 1:
         for media_season_index in media.seasons:
@@ -99,7 +99,7 @@ def updateTV(metadata, media):
             if match:
                 metadata.originally_available_at = Datetime.ParseDate(match.group(1)).date()
         else:
-            #flag_ending = True
+            flag_ending = True
             url2 = url.replace('w=tv&', '') 
             root2 = HTML.ElementFromURL(url2)
             items2 = root2.xpath('//*[@id="tvpColl"]/div[2]/div/div[1]/div')
@@ -193,9 +193,13 @@ def updateTV(metadata, media):
         parts = media.seasons[media_season_index].all_parts()
         episode_no_list = []
         episode_date_list = []
-        #if flag_ending and parts[0].file.find(u'종영') == -1:
-        #    metadata.title = u'[종영]%s' % metadata.title
-        
+        if flag_ending and Prefs['end_noti_filepath'] != '':
+            end_noti_filepath = Prefs['end_noti_filepath'].split(',')
+            for tmp in end_noti_filepath:
+                if parts[0].file.find(tmp) != -1:
+                    metadata.title = u'[종영]%s' % metadata.title
+                    break
+
         for p in parts:
             tmp = os.path.basename(p.file)
             Log(p.file)
