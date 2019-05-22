@@ -37,7 +37,8 @@ def searchTV(results, media, lang):
                 results.Append(MetadataSearchResult(id=series['id'], name=series['title'], year=series['year'], score=95-(index*5), lang=lang))
     # 미디어 단일, 메타 단일 or 미디어 시즌, 메타 단일
     else:
-        if data['status'] != 0:
+        # 2019-05-23 미리보기 에피들이 많아져서 그냥 방송예정도 선택되게.
+        #if data['status'] != 0:
             Log(data)
             results.Append(MetadataSearchResult(id=data['id'], name=data['title'], year=data['year'], score=100, lang=lang))
 
