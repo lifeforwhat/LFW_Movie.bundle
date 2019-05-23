@@ -87,6 +87,7 @@ def updateTV(metadata, media):
                 metadata.title = media.title.split('|')[0].strip()
             else:
                 metadata.title = title
+            metadata.title_sort = unicodedata.normalize('NFKD', metadata.title)
 
         items = root.xpath('//*[@id="tv_program"]/div[1]/div[3]/span')
         if items:

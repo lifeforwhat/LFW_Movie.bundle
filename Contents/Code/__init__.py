@@ -43,6 +43,7 @@ def updateDaumMovie(cate, metadata):
     data = JSON.ObjectFromURL(url=DAUM_MOVIE_DETAIL % metadata.id)
     info = data['data']
     metadata.title = info['titleKo']
+    metadata.title_sort = unicodedata.normalize('NFKD', metadata.title)
     metadata.original_title = info['titleEn']
     metadata.genres.clear()
     metadata.year = int(info['prodYear'])
@@ -190,6 +191,3 @@ class SJ_DaumTvAgent(Agent.TV_Shows):
     def update(self, metadata, media, lang):
         Log.Info("in update ID = %s" % metadata.id)
         updateTV(metadata, media)
-
-
-#https://search.daum.net/search?nil_suggest=btn&w=tot&DA=SBC&q=%EC%98%81%ED%99%94+Daylights+End
