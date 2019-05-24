@@ -191,3 +191,6 @@ class SJ_DaumTvAgent(Agent.TV_Shows):
     def update(self, metadata, media, lang):
         Log.Info("in update ID = %s" % metadata.id)
         updateTV(metadata, media)
+        import local_tv_extras
+        local_tv_extras.update(metadata, media)
+
