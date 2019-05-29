@@ -195,7 +195,7 @@ def updateTV(metadata, media):
         parts = media.seasons[media_season_index].all_parts()
         episode_no_list = []
         episode_date_list = []
-        if flag_ending and Prefs['end_noti_filepath'] != '':
+        if flag_ending and Prefs['end_noti_filepath'] is not None and Prefs['end_noti_filepath'] != '':
             end_noti_filepath = Prefs['end_noti_filepath'].split(',')
             for tmp in end_noti_filepath:
                 if parts[0].file.find(tmp) != -1:
