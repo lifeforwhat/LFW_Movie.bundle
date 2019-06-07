@@ -18,7 +18,7 @@ def searchTV(results, media, lang):
                 break
     Log('SEARCH : %s' % media.show)
     data = get_show_list(media.show)
-
+    Log('SEARCH : %s' % data)
     # 미디어도 시즌, 메타도 시즌 
     if flag_media_season and len(data['series']) > 1:
         # 마지막 시즌 ID

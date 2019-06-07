@@ -22,6 +22,7 @@ class DaumTV(object):
             tag_index = len(tags)-1
             entity = {}
             entity['title'] = tags[tag_index].text
+            Log('get_show_info_on_home title: %s', entity['title'])
             match = re.compile(r'q\=(?P<title>.*?)&').search(tags[tag_index].attrib['href'])
             if match:
                 entity['title'] = urllib.unquote(match.group('title'))
@@ -34,18 +35,26 @@ class DaumTV(object):
                     entity['status'] = 2
                 elif tags[0].text == u'방송예정':
                     entity['status'] = 0
-            
+            Log('get_show_info_on_home status: %s', entity['status'])
             tags = root.xpath('//*[@id="tvpColl"]/div[2]/div/div[1]/div')
             entity['extra_info'] = tags[0].text_content().strip()
+            Log('get_show_info_on_home extra_info: %s', entity['extra_info'])
 
+            entity['studio'] = ''
             tags = root.xpath('//*[@id="tvpColl"]/div[2]/div/div[1]/div/a')
-            entity['studio'] = tags[0].text
-            
+            if len(tags) == 1:
+                entity['studio'] = tags[0].text
+            else:
+                tags = root.xpath('//*[@id="tvpColl"]/div[2]/div/div[1]/div/span[1]')
+                if len(tags) == 1:
+                    entity['studio'] = tags[0].text
+            Log('get_show_info_on_home studio: %s', entity['studio'])
+
             tags = root.xpath('//*[@id="tvpColl"]/div[2]/div/div[1]/div/span')
             entity['extra_info_array'] = [tag.text for tag in tags]
 
             entity['year'] = re.compile(r'(?P<year>\d{4})').search(entity['extra_info_array'][-1]).group('year')
-            
+            Log('get_show_info_on_home 1: %s', entity['status'])
             #시리즈
             entity['series'] = []
             entity['series'].append({'title':entity['title'], 'id' : entity['id'], 'year' : entity['year']})
@@ -77,7 +86,7 @@ class DaumTV(object):
                         dic['year'] = None
                     entity['series'].append(dic)
                 entity['series'] = sorted(entity['series'] , key=lambda k: int(k['id'])) 
-
+            Log('SERIES : %s', len(entity['series']))
             #동명
             entity['equal_name'] = []
             tags = root.xpath(u'//div[@id="tv_program"]//dt[contains(text(),"동명 콘텐츠")]//following-sibling::dd')
