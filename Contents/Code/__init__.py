@@ -18,6 +18,7 @@ def Start():
     HTTP.Headers['Accept'] = 'text/html, application/json'
   
 ####################################################################################################
+"""
 def searchDaumMovie(cate, results, media, lang):
   media_name = media.name
   media_name = unicodedata.normalize('NFKC', unicode(media_name)).strip()
@@ -36,6 +37,7 @@ def searchDaumMovie(cate, results, media, lang):
       score = 10
     Log.Debug('ID=%s, media_name=%s, title=%s, year=%s, score=%d' %(id, media_name, title, year, score))
     results.Append(MetadataSearchResult(id=id, name=title, year=year, score=score, lang=lang))
+"""
 
 def updateDaumMovie(cate, metadata):
   # (1) from detail page
@@ -170,7 +172,7 @@ class SJ_DaumMovieAgent(Agent.Movies):
     languages = [Locale.Language.Korean]
     primary_provider = True
     accepts_from = ['com.plexapp.agents.localmedia']
-
+    fallback_agent = 'com.plexapp.agents.imdb'
     def search(self, results, media, lang, manual=False):
         return searchMovie(results, media, lang)
 

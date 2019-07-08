@@ -19,6 +19,8 @@ def searchTV(results, media, lang):
     Log('SEARCH : %s' % media.show)
     data = get_show_list(media.show)
     Log('SEARCH : %s' % data)
+    if data is None:
+        return
     # 미디어도 시즌, 메타도 시즌 
     if flag_media_season and len(data['series']) > 1:
         # 마지막 시즌 ID
@@ -201,25 +203,30 @@ def updateTV(metadata, media):
                 if parts[0].file.find(tmp) != -1:
                     metadata.title = u'[종영]%s' % metadata.title
                     break
-
+        Log('parts : %s', len(parts))
         for p in parts:
-            tmp = os.path.basename(p.file)
-            Log(p.file)
-            match = Regex(r'([sS](?P<season>[0-9]{1,2}))?[eE](?P<ep>[0-9]{1,4})').search(tmp)
-            if match:
-                value = int(match.group('ep'))
-                if value not in episode_no_list:
-                    episode_no_list.append(value)
-            for regex in [
-                r'[^0-9a-zA-Z](?P<year>[0-9]{2})(?P<month>[0-9]{2})(?P<day>[0-9]{2})[^0-9a-zA-Z]', # 6자리
-                r'(?P<year>[0-9]{4})[^0-9a-zA-Z]+(?P<month>[0-9]{2})[^0-9a-zA-Z]+(?P<day>[0-9]{2})([^0-9]|$)',  # 2009-02-10 
-            ]:
-                match = Regex(regex).search(tmp)
+            try:
+                tmp = os.path.basename(p.file)
+                Log(p.file)
+                match = Regex(r'([sS](?P<season>[0-9]{1,2}))?[eE](?P<ep>[0-9]{1,4})').search(tmp)
                 if match:
-                    value = '%s%s%s' % (match.group('year')[-2:], match.group('month'), match.group('day'))
-                    if value not in episode_date_list:
-                        episode_date_list.append(value)
-                        break
+                    value = int(match.group('ep'))
+                    if value not in episode_no_list:
+                        episode_no_list.append(value)
+                for regex in [
+                    r'[^0-9a-zA-Z](?P<year>[0-9]{2})(?P<month>[0-9]{2})(?P<day>[0-9]{2})[^0-9a-zA-Z]', # 6자리
+                    r'(?P<year>[0-9]{4})[^0-9a-zA-Z]+(?P<month>[0-9]{2})[^0-9a-zA-Z]+(?P<day>[0-9]{2})([^0-9]|$)',  # 2009-02-10 
+                ]:
+                    match = Regex(regex).search(tmp)
+                    if match:
+                        value = '%s%s%s' % (match.group('year')[-2:], match.group('month'), match.group('day'))
+                        if value not in episode_date_list:
+                            episode_date_list.append(value)
+                            break
+            except Exception as e:
+                Log('Exception225:%s', e)
+                Log(traceback.format_exc())
+
         Log('episode_no_list : %s', len(episode_no_list))
         Log('episode_date_list : %s', len(episode_date_list))
         episode_url_list = []
@@ -230,6 +237,7 @@ def updateTV(metadata, media):
             if len(a_tag) != 1:
                 continue
             query = 'https://search.daum.net/search%s' % a_tag[0].attrib['href']
+            Log(query)
             if item.attrib['data-clip'][-6:] in episode_date_list:
                 episode_url_list.append(query)
             else:
