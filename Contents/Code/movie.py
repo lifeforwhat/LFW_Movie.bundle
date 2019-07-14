@@ -17,6 +17,9 @@ def searchMovie(results, media, lang):
     is_include_kor, movie_list = MovieSearch.search_movie(movie_name, movie_year)
     Log(movie_list)
     for data in movie_list:
-        Log(data)
-        results.Append(MetadataSearchResult(id=data['id'], name=data['title'], year=int(data['year']), score=data['score'], lang=lang))
+        #Log(data)
+        try:
+            results.Append(MetadataSearchResult(id=data['id'], name=data['title'], year=int(data['year']), score=data['score'], lang=lang))
+        except:
+            pass
 
