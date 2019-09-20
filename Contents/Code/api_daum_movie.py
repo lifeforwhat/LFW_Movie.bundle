@@ -182,6 +182,78 @@ class MovieSearch(object):
             log_error(traceback.format_exc())    
 
     @staticmethod
+    def get_movie_info_from_home(url):
+        try:
+            html = get_html(url)
+            movie = None
+            try:
+                movie = html.get_element_by_id('movieEColl')
+            except Exception as e: 
+                #log_error('Exception:%s', e)
+                #log_error('SEARCH_MOVIE NOT MOVIEECOLL')
+                pass
+            if movie is None:
+                return None
+            
+            title_tag = movie.get_element_by_id('movieTitle')
+            a_tag = title_tag.find('a')
+            href = a_tag.attrib['href']
+            title = a_tag.find('b').text_content()
+            
+            # 2019-08-09
+            tmp = title_tag.text_content()
+            #tmp_year = movie_year
+            tmp_year = ''
+            match = re.compile(ur'(?P<year>\d{4})\s제작').search(tmp)
+            
+            more = {}
+            if match:
+                tmp_year = match.group('year')
+                more['eng_title'] = tmp.replace(title, '').replace(tmp_year, '').replace(u'제작', '').replace(u',', '').strip()
+            
+            country_tag = movie.xpath('//div[3]/div/div[1]/div[2]/dl[1]/dd[2]')
+            country = ''
+            if country_tag:
+                country = country_tag[0].text_content().split('|')[0].strip()
+                log_debug(country)
+            more['poster'] = movie.xpath('//*[@id="nmovie_img_0"]/a/img')[0].attrib['src']
+            more['title'] = movie.xpath('//*[@id="movieTitle"]/span')[0].text_content()
+            tmp = movie.xpath('//*[@id="movieEColl"]/div[3]/div/div[1]/div[2]/dl')
+            more['info'] = []
+            #for t in tmp:
+            #    more['info'].append(t.text_content().strip())
+            #more['info'].append(tmp[0].text_content().strip())
+            more['info'].append(country_tag[0].text_content().strip())
+
+            #2019-09-07
+            log_debug(more['info'][0])
+            tmp = more['info'][0].split('|')
+            if len(tmp) == 5:
+                more['country'] = tmp[0].replace(u'외', '').strip()
+                more['genre'] = tmp[1].replace(u'외', '').strip()
+                more['date'] = tmp[2].replace(u'개봉', '').strip()
+                more['rate'] = tmp[3].strip()
+                more['during'] = tmp[4].strip()
+            elif len(tmp) == 4:
+                more['country'] = tmp[0].replace(u'외', '').strip()
+                more['genre'] = tmp[1].replace(u'외', '').strip()
+                more['date'] = ''
+                more['rate'] = tmp[2].strip()
+                more['during'] = tmp[3].strip()
+            elif len(tmp) == 3:
+                more['country'] = tmp[0].replace(u'외', '').strip()
+                more['genre'] = tmp[1].replace(u'외', '').strip()
+                more['date'] = ''
+                more['rate'] = ''
+                more['during'] = tmp[2].strip()
+            daum_id = href.split('=')[1]
+            return {'movie':movie, 'title':title, 'daum_id':daum_id, 'year':tmp_year, 'country':country, 'more':more}
+
+        except Exception as e: 
+            log_error('Exception:%s', e)
+            log_error(traceback.format_exc())   
+
+    @staticmethod
     def search_movie_web(movie_list, movie_name, movie_year):
         try:
             #movie_list = []
@@ -204,37 +276,73 @@ class MovieSearch(object):
         
         try:
             url = 'https://search.daum.net/search?nil_suggest=btn&w=tot&DA=SBC&q=%s%s' % ('%EC%98%81%ED%99%94+', urllib.quote(movie_name.encode('utf8')))
-            html = get_html(url)
-            movie = None
-            try:
-                movie = html.get_element_by_id('movieEColl')
-            except Exception as e: 
-                #log_error('Exception:%s', e)
-                #log_error('SEARCH_MOVIE NOT MOVIEECOLL')
-                pass
-            if movie is not None:
-                title = movie.get_element_by_id('movieTitle')
-                a_tag = title.find('a')
-                href = a_tag.attrib['href']
-                title = a_tag.find('b').text_content()
-                country_tag = movie.xpath('//div[3]/div/div[1]/div[2]/dl[1]/dd[2]')
-                country = ''
-                if country_tag:
-                    country = country_tag[0].text_content().split('|')[0].strip()
-                MovieSearch.movie_append(movie_list, {'id':href.split('=')[1], 'title':title, 'year':movie_year, 'score':100, 'country':country})
-                #results.Append(MetadataSearchResult(id=href.split('=')[1], name=title, year=movie_year, score=100, lang=lang))
-                tmp = movie.find('div[@class="coll_etc"]')
-                if tmp is not None:
-                    tag_list = tmp.findall('.//a')
-                    for tag in tag_list:
-                        match = re.compile(r'(.*?)\((.*?)\)').search(tag.text_content())
-                        if match:
-                            daum_id = tag.attrib['href'].split('||')[1]
-                            score = 80
-                            if match.group(2) == movie_year:
-                                score = 90
-                            MovieSearch.movie_append(movie_list, {'id':daum_id, 'title':match.group(1), 'year':match.group(2), 'score':score})
-                            #results.Append(MetadataSearchResult(id=daum_id, name=match.group(1), year=match.group(2), score=score, lang=lang))
+            ret = MovieSearch.get_movie_info_from_home(url)
+            if ret is not None:
+
+                # 부제목때문에 제목은 체크 하지 않는다.
+                # 홈에 검색한게 년도도 같다면 score : 100을 주고 다른것은 검색하지 않는다.
+                if ret['year'] == movie_year:
+                    score = 100
+                    need_another_search = False
+                else:
+                    score = 90
+                    need_another_search = True
+                MovieSearch.movie_append(movie_list, {'id':ret['daum_id'], 'title':ret['title'], 'year':ret['year'], 'score':score, 'country':ret['country'], 'more':ret['more']})
+
+                log_debug('need_another_search : %s' % need_another_search)
+                
+                movie = ret['movie']
+
+                if need_another_search:
+                    # 동명영화
+                    tmp = movie.find('div[@class="coll_etc"]')
+                    log_debug('coll_etc : %s' % tmp)
+                    if tmp is not None:
+                        first_url = None
+                        tag_list = tmp.findall('.//a')
+                        for tag in tag_list:
+                            match = re.compile(r'(.*?)\((.*?)\)').search(tag.text_content())
+                            if match:
+                                daum_id = tag.attrib['href'].split('||')[1]
+                                score = 80
+                                if match.group(1) == movie_name and match.group(2) == movie_year:
+                                    first_url = 'https://search.daum.net/search?%s' % tag.attrib['href']
+                                elif match.group(2) == movie_year and first_url is not None:
+                                    first_url = 'https://search.daum.net/search?%s' % tag.attrib['href']
+                                MovieSearch.movie_append(movie_list, {'id':daum_id, 'title':match.group(1), 'year':match.group(2), 'score':score})
+                                #results.Append(MetadataSearchResult(id=daum_id, name=match.group(1), year=match.group(2), score=score, lang=lang))
+                        log_debug('first_url : %s' % first_url)
+                        if need_another_search and first_url is not None:
+                            #log_debug('RRRRRRRRRRRRRRRRRRRRRR')
+                            new_ret = MovieSearch.get_movie_info_from_home(first_url)
+                            MovieSearch.movie_append(movie_list, {'id':new_ret['daum_id'], 'title':new_ret['title'], 'year':new_ret['year'], 'score':100, 'country':new_ret['country'], 'more':new_ret['more']})
+                    
+                    #시리즈
+                    tmp = movie.find('.//ul[@class="list_thumb list_few"]')
+                    log_debug('SERIES:%s' % tmp)
+                    if tmp is not None:
+                        tag_list = tmp.findall('.//div[@class="wrap_cont"]')
+                        first_url = None
+                        score = 80
+                        for tag in tag_list:
+                            a_tag = tag.find('a')
+                            daum_id = a_tag.attrib['href'].split('||')[1]
+                            daum_name = a_tag.text_content()
+                            span_tag = tag.find('span')
+                            year = span_tag.text_content()
+                            log_debug('daum_id:%s %s %s' % (daum_id, year, daum_name))
+                            if daum_name == movie_name and year == movie_year:
+                                first_url = 'https://search.daum.net/search?%s' % a_tag.attrib['href']
+                            elif year == movie_year and first_url is not None:
+                                first_url = 'https://search.daum.net/search?%s' % tag.attrib['href']
+                            MovieSearch.movie_append(movie_list, {'id':daum_id, 'title':daum_name, 'year':year, 'score':score}) 
+                            log_debug('first_url : %s' % first_url)
+                        if need_another_search and first_url is not None:
+                            #log_debug('RRRRRRRRRRRRRRRRRRRRRR')
+                            new_ret = MovieSearch.get_movie_info_from_home(first_url)
+                            MovieSearch.movie_append(movie_list, {'id':new_ret['daum_id'], 'title':new_ret['title'], 'year':new_ret['year'], 'score':100, 'country':new_ret['country'], 'more':new_ret['more']})
+                
+
         except Exception as e: 
             log_error('Exception:%s', e)
             log_error(traceback.format_exc())
