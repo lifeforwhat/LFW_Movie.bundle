@@ -4,21 +4,21 @@
 import urllib, unicodedata
 
 DAUM_MOVIE_SRCH   = "http://movie.daum.net/data/movie/search/v2/%s.json?size=20&start=1&searchText=%s"
-
+ 
 DAUM_MOVIE_DETAIL = "http://movie.daum.net/data/movie/movie_info/detail.json?movieId=%s"
 DAUM_MOVIE_CAST   = "http://movie.daum.net/data/movie/movie_info/cast_crew.json?pageNo=1&pageSize=100&movieId=%s"
 DAUM_MOVIE_PHOTO  = "http://movie.daum.net/data/movie/photo/movie/list.json?pageNo=1&pageSize=100&id=%s"
 
-from tv import searchTV, updateTV
-from movie import searchMovie
+from tv import searchTV, updateTV 
+from movie import searchMovie  
+   
 
-
-def Start():
+def Start():      
     HTTP.CacheTime = CACHE_1HOUR * 12
     HTTP.Headers['Accept'] = 'text/html, application/json'
   
 ####################################################################################################
-"""
+"""   
 def searchDaumMovie(cate, results, media, lang):
   media_name = media.name
   media_name = unicodedata.normalize('NFKC', unicode(media_name)).strip()

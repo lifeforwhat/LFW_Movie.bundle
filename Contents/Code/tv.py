@@ -49,6 +49,8 @@ def searchTV(results, media, lang):
 
 
 def updateTV(metadata, media):
+    Log(metadata)
+    Log(media)
     # media : Framework.api.agentkit.MediaTree
     flag_ending = False
     flag_media_season = False
@@ -73,7 +75,9 @@ def updateTV(metadata, media):
         if flag_media_season and len(data['series']) > 1:
             search_title = data['series'][int(media_season_index)-1]['title']
             search_id = data['series'][int(media_season_index)-1]['id']
+            
         metadata_season = metadata.seasons[media_season_index]
+        search_title = search_title.split('|')[0]
         Log('flag_media_season : %s', flag_media_season)
         Log('search_title : %s', search_title)
         Log('search_id : %s', search_id)
