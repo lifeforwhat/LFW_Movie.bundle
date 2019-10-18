@@ -52,8 +52,10 @@ class DaumTV(object):
 
             tags = root.xpath('//*[@id="tvpColl"]/div[2]/div/div[1]/div/span')
             entity['extra_info_array'] = [tag.text for tag in tags]
-
-            entity['year'] = re.compile(r'(?P<year>\d{4})').search(entity['extra_info_array'][-1]).group('year')
+            try:
+                entity['year'] = re.compile(r'(?P<year>\d{4})').search(entity['extra_info_array'][-1]).group('year')
+            except:
+                entity['year'] = None
             Log('get_show_info_on_home 1: %s', entity['status'])
             #시리즈
             entity['series'] = []
@@ -81,7 +83,11 @@ class DaumTV(object):
                     dic['id'] = re.compile(r'irk\=(?P<id>\d+)').search(tag.xpath('a')[0].attrib['href']).group('id')
                     if tag.xpath('span'):
                         dic['date'] = tag.xpath('span')[0].text
-                        dic['year'] = re.compile(r'(?P<year>\d{4})').search(dic['date']).group('year')
+                        #2019-10-18 런던 콜걸 벨  연도 없음.
+                        try:
+                            dic['year'] = re.compile(r'(?P<year>\d{4})').search(dic['date']).group('year')
+                        except:
+                            dic['year'] = None
                     else:
                         dic['year'] = None
                     entity['series'].append(dic)
