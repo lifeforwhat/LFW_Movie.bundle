@@ -49,8 +49,6 @@ def searchTV(results, media, lang):
 
 
 def updateTV(metadata, media):
-    Log(metadata)
-    Log(media)
     # media : Framework.api.agentkit.MediaTree
     flag_ending = False
     flag_media_season = False
@@ -75,9 +73,7 @@ def updateTV(metadata, media):
         if flag_media_season and len(data['series']) > 1:
             search_title = data['series'][int(media_season_index)-1]['title']
             search_id = data['series'][int(media_season_index)-1]['id']
-            
         metadata_season = metadata.seasons[media_season_index]
-        search_title = search_title.split('|')[0]
         Log('flag_media_season : %s', flag_media_season)
         Log('search_title : %s', search_title)
         Log('search_id : %s', search_id)
@@ -235,7 +231,13 @@ def updateTV(metadata, media):
         Log('episode_date_list : %s', len(episode_date_list))
         episode_url_list = []
         items = root.xpath('//*[@id="clipDateList"]/li')
-        if len(items) > 300: items = items[len(items)-300:]
+        try:
+            max_episode_count = int(Prefs['max_episode_count'])
+            if max_episode_count > 0:
+                if len(items) > max_episode_count: items = items[len(items)-max_episode_count:]
+        except:
+            pass
+        
         for item in items:
             a_tag = item.xpath('a') 
             if len(a_tag) != 1:

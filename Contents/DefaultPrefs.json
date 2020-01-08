@@ -6,6 +6,18 @@
 		"default": ""
   },
   {
+		"id": "include_time_info",
+		"label": "영화 재생 버전을 분리하여 추가.",
+		"type": "bool",
+		"default": "False"
+	},
+  {
+    "id": "max_episode_count",
+    "label": "쇼 메타 검색시 가져올 에피소드 수. 0이면 제한 없음.",
+    "type": "text",
+		"default": "300"
+  },
+  {
     "id": "max_num_posters",
     "label": "Maximum Number of Posters",
     "type": "enum",

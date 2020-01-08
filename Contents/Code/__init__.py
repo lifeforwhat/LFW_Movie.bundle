@@ -4,21 +4,21 @@
 import urllib, unicodedata
 
 DAUM_MOVIE_SRCH   = "http://movie.daum.net/data/movie/search/v2/%s.json?size=20&start=1&searchText=%s"
- 
+
 DAUM_MOVIE_DETAIL = "http://movie.daum.net/data/movie/movie_info/detail.json?movieId=%s"
 DAUM_MOVIE_CAST   = "http://movie.daum.net/data/movie/movie_info/cast_crew.json?pageNo=1&pageSize=100&movieId=%s"
 DAUM_MOVIE_PHOTO  = "http://movie.daum.net/data/movie/photo/movie/list.json?pageNo=1&pageSize=100&id=%s"
 
-from tv import searchTV, updateTV 
-from movie import searchMovie  
-   
+from tv import searchTV, updateTV
+from movie import searchMovie
 
-def Start():      
+
+def Start():
     HTTP.CacheTime = CACHE_1HOUR * 12
     HTTP.Headers['Accept'] = 'text/html, application/json'
   
 ####################################################################################################
-"""   
+"""
 def searchDaumMovie(cate, results, media, lang):
   media_name = media.name
   media_name = unicodedata.normalize('NFKC', unicode(media_name)).strip()
@@ -42,7 +42,8 @@ def searchDaumMovie(cate, results, media, lang):
 def updateDaumMovie(cate, metadata):
   # (1) from detail page
     poster_url = None
-    data = JSON.ObjectFromURL(url=DAUM_MOVIE_DETAIL % metadata.id)
+    metadata_id = metadata.id.split('_')[0]
+    data = JSON.ObjectFromURL(url=DAUM_MOVIE_DETAIL % metadata_id)
     info = data['data']
     metadata.title = info['titleKo']
     metadata.title_sort = unicodedata.normalize('NFKD', metadata.title)
@@ -71,7 +72,7 @@ def updateDaumMovie(cate, metadata):
     writers = list()
     roles = list()
 
-    data = JSON.ObjectFromURL(url=DAUM_MOVIE_CAST % metadata.id)
+    data = JSON.ObjectFromURL(url=DAUM_MOVIE_CAST % metadata_id)
     for item in data['data']:
       cast = item['castcrew']
       if cast['castcrewCastName'] in [u'감독', u'연출']:
@@ -124,7 +125,7 @@ def updateDaumMovie(cate, metadata):
         meta_writer = metadata.writers.new()
         if 'name' in writer:
           meta_writer.name = writer['name']
-        if 'photo' in writer:
+        if 'photo' in writer: 
           meta_writer.photo = writer['photo']
     if roles:
       metadata.roles.clear()
@@ -137,9 +138,9 @@ def updateDaumMovie(cate, metadata):
         if 'photo' in role:
           meta_role.photo = role['photo']
 
-  # (3) from photo page
+  # (3) from photo page 
     url_tmpl = DAUM_MOVIE_PHOTO
-    data = JSON.ObjectFromURL(url=url_tmpl % metadata.id)
+    data = JSON.ObjectFromURL(url=url_tmpl % metadata_id)
     max_poster = int(Prefs['max_num_posters'])
     max_art = int(Prefs['max_num_arts'])
     idx_poster = 0
@@ -168,10 +169,13 @@ def updateDaumMovie(cate, metadata):
     
 ####################################################################################################
 class SJ_DaumMovieAgent(Agent.Movies):
-    name = "SJ Daum" 
+    name = "SJ Daum"  
     languages = [Locale.Language.Korean]
     primary_provider = True
-    accepts_from = ['com.plexapp.agents.localmedia']
+    accepts_from = ['com.plexapp.agents.localmedia', 'com.plexapp.agents.xbmcnfotv']
+    contributes_to = [
+        'com.plexapp.agents.xbmcnfotv',
+    ]
     fallback_agent = 'com.plexapp.agents.imdb'
     def search(self, results, media, lang, manual=False):
         return searchMovie(results, media, lang)
@@ -185,7 +189,10 @@ class SJ_DaumTvAgent(Agent.TV_Shows):
     name = "SJ Daum"
     primary_provider = True
     languages = [Locale.Language.Korean]
-    accepts_from = ['com.plexapp.agents.localmedia']
+    accepts_from = ['com.plexapp.agents.localmedia', 'com.plexapp.agents.xbmcnfo']
+    contributes_to = [
+        'com.plexapp.agents.xbmcnfo',
+    ]
 
     def search(self, results, media, lang, manual=False):
         return searchTV(results, media, lang)
