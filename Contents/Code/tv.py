@@ -69,6 +69,7 @@ def updateTV(metadata, media):
         if media_season_index == '0':
             continue
         search_title = media.title.replace(u'[종영]', '')
+        search_title = search_title.split('|')[0]
         search_id = metadata.id            
         if flag_media_season and len(data['series']) > 1:
             search_title = data['series'][int(media_season_index)-1]['title']
@@ -237,7 +238,7 @@ def updateTV(metadata, media):
                 if len(items) > max_episode_count: items = items[len(items)-max_episode_count:]
         except:
             pass
-        
+ 
         for item in items:
             a_tag = item.xpath('a') 
             if len(a_tag) != 1:
