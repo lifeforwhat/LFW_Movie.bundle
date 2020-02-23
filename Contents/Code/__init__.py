@@ -50,6 +50,8 @@ def updateDaumMovie(cate, metadata):
     metadata.original_title = info['titleEn']
     metadata.genres.clear()
     metadata.year = int(info['prodYear'])
+    metadata.content_rating = String.DecodeHTMLEntities(String.StripTags(info['admissionDesc']).strip())
+
     try: metadata.rating = float(info['moviePoint']['inspectPointAvg'])
     except: pass
     for item in info['genres']:
