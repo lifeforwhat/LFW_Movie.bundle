@@ -60,8 +60,8 @@ def updateDaumMovie(cate, metadata):
     except: pass
     try: metadata.originally_available_at = Datetime.ParseDate(info['releaseDate']).date()
     except: pass
-    metadata.summary = String.DecodeHTMLEntities(String.StripTags(info['plot']).strip())
-
+    try: metadata.summary = String.DecodeHTMLEntities(String.StripTags(info['plot']).strip())
+    except: pass
     metadata.countries.clear()
     for item in info['countries']:
       metadata.countries.add(item['countryKo'])
