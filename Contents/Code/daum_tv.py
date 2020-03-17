@@ -5,6 +5,7 @@ import urllib2
 import unicodedata
 import traceback
 import re
+import datetime
 
 def log(msg, *args, **kwargs):
     Log(msg, *args, **kwargs)
@@ -53,8 +54,12 @@ class DaumTV(object):
             tags = root.xpath('//*[@id="tvpColl"]/div[2]/div/div[1]/div/span')
             entity['extra_info_array'] = [tag.text for tag in tags]
 
-            entity['year'] = re.compile(r'(?P<year>\d{4})').search(entity['extra_info_array'][-1]).group('year')
-            Log('get_show_info_on_home 1: %s', entity['status'])
+            try:
+                entity['year'] = re.compile(r'(?P<year>\d{4})').search(entity['extra_info_array'][-1]).group('year')
+                Log('get_show_info_on_home 1: %s', entity['status'])
+            except:
+                #entity['year'] = str(datetime.datetime.now().year)
+                entity['year'] = ''
             #시리즈
             entity['series'] = []
             entity['series'].append({'title':entity['title'], 'id' : entity['id'], 'year' : entity['year']})
