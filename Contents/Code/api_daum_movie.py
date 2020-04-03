@@ -263,13 +263,13 @@ class MovieSearch(object):
             for index, item in enumerate(data['items']['movie']):
                 tmps = item.split('|')
                 score = 85 - (index*5)
-                if tmps[0].find(movie_name) != -1 and tmps[3] == movie_year:
+                if tmps[0].find(movie_name) != -1 and tmps[-2] == movie_year:
                     score = 95
                 elif tmps[3] == movie_year:
                     score = score + 5
                 if score < 10:
                     score = 10
-                MovieSearch.movie_append(movie_list, {'id':tmps[1], 'title':tmps[0], 'year':tmps[3], 'score':score})
+                MovieSearch.movie_append(movie_list, {'id':tmps[1], 'title':tmps[0], 'year':tmps[-2], 'score':score})
         except Exception as e: 
             log_error('Exception:%s', e)
             log_error(traceback.format_exc())
@@ -319,6 +319,9 @@ class MovieSearch(object):
                     
                     #시리즈
                     tmp = movie.find('.//ul[@class="list_thumb list_few"]')
+                    if tmp is None:
+                        tmp = movie.find('.//ul[@class="list_thumb list_more"]')
+                    
                     log_debug('SERIES:%s' % tmp)
                     if tmp is not None:
                         tag_list = tmp.findall('.//div[@class="wrap_cont"]')

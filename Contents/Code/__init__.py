@@ -65,8 +65,9 @@ def updateDaumMovie(cate, metadata):
     metadata.countries.clear()
     for item in info['countries']:
       metadata.countries.add(item['countryKo'])
-
-    poster_url = info['photo']['fullname']
+    
+    try: poster_url = info['photo']['fullname']
+    except:pass
 
   # (2) cast crew
     directors = list()

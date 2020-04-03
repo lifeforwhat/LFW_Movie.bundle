@@ -23,6 +23,7 @@ def searchMovie(results, media, lang):
             if Prefs['include_time_info']:
                 meta_id += '_%s' % int(time.time())
             results.Append(MetadataSearchResult(id=meta_id, name=data['title'], year=int(data['year']), score=data['score'], lang=lang))
-        except:
-            pass
+        except Exception as e: 
+            Log('Exception:%s', e)
+            Log(traceback.format_exc())  
 
