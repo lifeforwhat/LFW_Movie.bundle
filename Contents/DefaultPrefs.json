@@ -18,6 +18,12 @@
 		"default": "300"
   },
   {
+    "id": "cookie",
+    "label": "HTTP Cookie",
+    "type": "text",
+		"default": "TIARA=gaXEIPluo-wWAFlwZN6l8gN3yzhkoo_piP.Kymhuy.6QBt4Q6.cRtxbKDaWpWajcyteRHzrlTVpJRxLjwLoMvyYLVi_7xJ1L"
+  },
+  {
     "id": "max_num_posters",
     "label": "Maximum Number of Posters",
     "type": "enum",
