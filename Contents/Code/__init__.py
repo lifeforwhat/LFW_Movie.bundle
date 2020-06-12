@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # Daum Movie
  
-import urllib, unicodedata
+import urllib, unicodedata, traceback, re
 
 DAUM_MOVIE_SRCH   = "http://movie.daum.net/data/movie/search/v2/%s.json?size=20&start=1&searchText=%s"
 
@@ -12,6 +12,9 @@ DAUM_MOVIE_PHOTO  = "http://movie.daum.net/data/movie/photo/movie/list.json?page
 from tv import searchTV, updateTV
 from movie import searchMovie
 
+@route('/version') 
+def version():
+    return '2020-06-12'
 
 def Start():
     #HTTP.CacheTime = CACHE_1HOUR * 12
@@ -42,33 +45,89 @@ def searchDaumMovie(cate, results, media, lang):
     results.Append(MetadataSearchResult(id=id, name=title, year=year, score=score, lang=lang))
 """
 
+def update_movie_by_web(metadata, metadata_id):
+  try:
+      url = 'https://movie.daum.net/moviedb/main?movieId=%s' % metadata_id
+      root = HTML.ElementFromURL(url)
+      tags = root.xpath('//span[@class="txt_name"]')
+      tmp = tags[0].text_content().split('(')
+      metadata.title = urllib.unquote(tmp[0])
+      metadata.title_sort = unicodedata.normalize('NFKD', metadata.title)
+      metadata.original_title = root.xpath('//span[@class="txt_origin"]')[0].text_content()
+      
+      metadata.year = int(tmp[1][:4])
+      try:
+        tags = root.xpath('//div[@class="info_origin"]/a/span')
+        if len(tags) == 4:
+          tmp = '%s.%s' % (tags[1].text_content(), tags[3].text_content())
+          metadata.rating = float(tmp)
+      except: pass
+      try:
+        metadata.genres.clear()
+        metadata.countries.clear()
+        tags = root.xpath('//dl[@class="list_movie list_main"]/dd')
+        for item in tags[0].text_content().split('/'):
+          metadata.genres.add(item.strip())
+        for item in tags[1].text_content().split(','):
+          metadata.countries.add(item.strip())
+        tmp = tags[2].text_content().strip()
+        match = re.compile(r'\d{4}\.\d{2}\.d{2}').match(tmp)
+        if match:
+          metadata.originally_available_at = Datetime.ParseDate(match.group(0).replace('.', '')).date()
+          tmp = tags[3].text_content().strip()
+        else:
+          metadata.originally_available_at = None
+        match = re.compile(ur'(?P<duration>\d{2,})분[\s,]?(?P<rate>.*?)$').match(tmp)
+        if match:
+          metadata.duration = int(match.group('duration').strip())*60
+          metadata.content_rating = String.DecodeHTMLEntities(String.StripTags(match.group('rate').strip()).strip())
+      except Exception as e:
+        Log('Exception:%s', e)
+        Log(traceback.format_exc())
+
+      #try: metadata.summary = String.DecodeHTMLEntities(String.StripTags(root.xpath('//div[@class="desc_movie"]/p')[0].text_content().strip()).strip())
+      try: metadata.summary = String.DecodeHTMLEntities(String.StripTags(root.xpath('//div[@class="desc_movie"]/p')[0].text_content().strip().replace('<br>', '\n\n')).strip())
+      except: pass
+  except Exception as e:
+    Log('Exception:%s', e)
+    Log(traceback.format_exc())
+
+
+
+
 def updateDaumMovie(cate, metadata):
   # (1) from detail page
     poster_url = None
     metadata_id = metadata.id.split('_')[0]
-    data = JSON.ObjectFromURL(url=DAUM_MOVIE_DETAIL % metadata_id)
-    info = data['data']
-    metadata.title = info['titleKo']
-    metadata.title_sort = unicodedata.normalize('NFKD', metadata.title)
-    metadata.original_title = info['titleEn']
-    metadata.genres.clear()
-    metadata.year = int(info['prodYear'])
-    try: metadata.content_rating = String.DecodeHTMLEntities(String.StripTags(info['admissionDesc']).strip())
-    except: pass
-    try: metadata.rating = float(info['moviePoint']['inspectPointAvg'])
-    except: pass
-    for item in info['genres']:
-      metadata.genres.add(item['genreName'])
-    try: metadata.duration = int(info['showtime'])*60
-    except: pass
-    try: metadata.originally_available_at = Datetime.ParseDate(info['releaseDate']).date()
-    except: pass
-    try: metadata.summary = String.DecodeHTMLEntities(String.StripTags(info['plot']).strip())
-    except: pass
-    metadata.countries.clear()
-    for item in info['countries']:
-      metadata.countries.add(item['countryKo'])
-    
+    update_movie_by_web(metadata, metadata_id)
+    """
+    try:
+      data = JSON.ObjectFromURL(url=DAUM_MOVIE_DETAIL % metadata_id)
+      info = data['data']
+      metadata.title = info['titleKo']
+      metadata.title_sort = unicodedata.normalize('NFKD', metadata.title)
+      metadata.original_title = info['titleEn']
+      metadata.genres.clear()
+      metadata.year = int(info['prodYear'])
+      try: metadata.content_rating = String.DecodeHTMLEntities(String.StripTags(info['admissionDesc']).strip())
+      except: pass
+      try: metadata.rating = float(info['moviePoint']['inspectPointAvg'])
+      except: pass
+      for item in info['genres']:
+        metadata.genres.add(item['genreName'])
+      try: metadata.duration = int(info['showtime'])*60
+      except: pass
+      try: metadata.originally_available_at = Datetime.ParseDate(info['releaseDate']).date()
+      except: pass
+      try: metadata.summary = String.DecodeHTMLEntities(String.StripTags(info['plot']).strip())
+      except: pass
+      metadata.countries.clear()
+      for item in info['countries']:
+        metadata.countries.add(item['countryKo'])
+    except:
+      update_movie_by_web(metadata, metadata_id)
+    """
+
     try: poster_url = info['photo']['fullname']
     except:pass
 
