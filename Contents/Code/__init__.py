@@ -14,7 +14,7 @@ from movie import searchMovie
 
 @route('/version') 
 def version():
-    return '2020-06-12'
+    return '2020-06-15'
 
 def Start():
     #HTTP.CacheTime = CACHE_1HOUR * 12
@@ -53,8 +53,9 @@ def update_movie_by_web(metadata, metadata_id):
       tmp = tags[0].text_content().split('(')
       metadata.title = urllib.unquote(tmp[0])
       metadata.title_sort = unicodedata.normalize('NFKD', metadata.title)
-      metadata.original_title = root.xpath('//span[@class="txt_origin"]')[0].text_content()
-      
+      try: metadata.original_title = root.xpath('//span[@class="txt_origin"]')[0].text_content()
+      except: pass
+
       metadata.year = int(tmp[1][:4])
       try:
         tags = root.xpath('//div[@class="info_origin"]/a/span')
