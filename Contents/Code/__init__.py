@@ -14,7 +14,7 @@ from movie import searchMovie
 
 @route('/version') 
 def version():
-    return '2020-06-15'
+    return '2020-06-16'
 
 def Start():
     #HTTP.CacheTime = CACHE_1HOUR * 12
@@ -72,10 +72,12 @@ def update_movie_by_web(metadata, metadata_id):
         for item in tags[1].text_content().split(','):
           metadata.countries.add(item.strip())
         tmp = tags[2].text_content().strip()
-        match = re.compile(r'\d{4}\.\d{2}\.d{2}').match(tmp)
-        if match:
+        match = re.compile(r'\d{4}\.\d{2}\.\d{2}').match(tmp)
+        if match: 
           metadata.originally_available_at = Datetime.ParseDate(match.group(0).replace('.', '')).date()
           tmp = tags[3].text_content().strip()
+          if tmp.find(u'재개봉') != -1:
+            tmp = tags[4].text_content().strip()
         else:
           metadata.originally_available_at = None
         match = re.compile(ur'(?P<duration>\d{2,})분[\s,]?(?P<rate>.*?)$').match(tmp)
