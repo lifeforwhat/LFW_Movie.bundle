@@ -14,7 +14,7 @@ from movie import searchMovie
 
 @route('/version') 
 def version():
-    return '2020-06-16'
+    return '2020-07-06'
 
 def Start():
     #HTTP.CacheTime = CACHE_1HOUR * 12
@@ -240,10 +240,8 @@ class SJ_DaumMovieAgent(Agent.Movies):
     name = "SJ Daum"  
     languages = [Locale.Language.Korean]
     primary_provider = True
-    accepts_from = ['com.plexapp.agents.localmedia', 'com.plexapp.agents.xbmcnfo']
-    contributes_to = [
-        'com.plexapp.agents.xbmcnfo',
-    ]
+    accepts_from = ['com.plexapp.agents.localmedia', 'com.plexapp.agents.xbmcnfo', 'com.plexapp.agents.opensubtitles', 'com.plexapp.agents.themoviedb']
+    contributes_to = ['com.plexapp.agents.xbmcnfo']
     fallback_agent = 'com.plexapp.agents.imdb'
     def search(self, results, media, lang, manual=False):
         return searchMovie(results, media, lang)
