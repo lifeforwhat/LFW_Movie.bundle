@@ -29,8 +29,18 @@ ChangeLog
 - ~~[스캐너](https://github.com/soju6jan/Plex-Series-Scanner-For-Korea) 연동~~
   + ~~다음에 에피소드 정보가 없을 경우 에피소드 회차가 있더라도 날짜로 먼저 인식~~
 
+### 20200727
+TMDb 컬렉션
+왓챠 컬렉션 
+왓챠 평론가 평론 (Official_user == True)
 
 
+# TODO
+왓챠 개인별 점수 컬렉션화
+왓챠 평론가 블랙리스트
+왓챠 평론가 화이트리스트
+왓챠 점수 덮어씌우기
+ETC
 
 
 # 원본
