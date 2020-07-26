@@ -4,9 +4,11 @@ from collections import OrderedDict
 try:
     import requests
     plex = False
+    Log.Info('requests imported')
 except:
     import urllib, unicodedata, traceback, re
     plex = True
+    Log.Info('requests not imported')
 from time import sleep
 
 class watcha:
@@ -15,9 +17,7 @@ class watcha:
             res = requests.get('https://api.watcha.com/api/searches?query='+keyword, headers = c_header)
             j = res.json()
         else:
-            # 이부분 인코드가 관건인데..
-            #movie_name = urllib.quote(keyword)
-            movie_name = keyword
+            movie_name = urllib.quote(keyword.encode('utf8'))
             Log.Info(str(keyword))
             j = JSON.ObjectFromURL('https://api.watcha.com/api/searches?query=%s' % (movie_name),
                         headers = c_header)
