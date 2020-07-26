@@ -252,10 +252,10 @@ def updateDaumMovie(cate, metadata):
         'x-watcha-client-region': 'KR',
         'x-watcha-client-version': '1.0.0'
     }
-    movie_name = unicodedata.normalize('NFKC', unicode("기생충")).strip()
+    """movie_name = unicodedata.normalize('NFKC', unicode("기생충")).strip()
     page = HTTP.Request('https://api.watcha.com/api/searches?query=%s' % (movie_name),
                         headers = watcha_headers)
-    Log.Info(str(page))
+    Log.Info(str(page))"""
 
     # 리뷰 클리어
 
@@ -268,17 +268,19 @@ def updateDaumMovie(cate, metadata):
     # tmdb collection 을 먼저 찾는다.
     tmdb_title_for_search = metadata.original_title
     tmdb_year = metadata.year
-    j , c = tmdb.tmdb().search(name=tmdb_title_for_search , year=tmdb_year)
-    # TAG (TMDB 시리즈 + 왓챠)
-    #Log.Info(str(j, c))
     try:
-        #tmdb_collection = d['tmdb_series']['name']
-        tmdb_collection = c['name']
-        if tmdb_collection != "":
-            metadata.collections.add('💿 ' +tmdb_collection)
+        j , c = tmdb.tmdb().search(name=tmdb_title_for_search , year=tmdb_year)
+        try:
+            tmdb_collection = c['name']
+            if tmdb_collection != "":
+                metadata.collections.add('💿 ' +tmdb_collection)
+        except Exception as e:
+            Log.Info(str(e))
+            pass
     except Exception as e:
         Log.Info(str(e))
         pass
+
     # Watcha
     try:
 
