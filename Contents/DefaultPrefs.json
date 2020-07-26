@@ -36,5 +36,11 @@
     "type": "enum",
     "values": [ "5", "10", "20" ],
     "default": "5"
+  },
+  {
+    "id": "collection_black_keyword",
+    "label": "왓챠 컬렉션 차단 키워드, | 로 구분",
+    "type": "text",
+    "default": "페미|여성주의|나의|나만의"
   }
 ]
