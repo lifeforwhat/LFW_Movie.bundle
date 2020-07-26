@@ -7,7 +7,7 @@ except:
 
 class tmdb:
     def search(self, name, year, lang='en'):
-        name = unicodedata.normalize('NFKD', name)
+        name = urllib.quote(name)
         if lang == "en":
             base_url = 'https://api.themoviedb.org/3/search/movie?api_key=b2f505af2cb75d692419696af851e517&language=en-US&query='+name+'&page=1&include_adult=true&year='+str(year)
             if plex == False:

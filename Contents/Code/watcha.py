@@ -15,7 +15,8 @@ class watcha:
             res = requests.get('https://api.watcha.com/api/searches?query='+keyword, headers = c_header)
             j = res.json()
         else:
-            movie_name = unicodedata.normalize('NFKC', unicode(keyword)).strip()
+            movie_name = urllib.quote(keyword)
+            Log.Info(str(keyword))
             j = JSON.ObjectFromURL('https://api.watcha.com/api/searches?query=%s' % (movie_name),
                         headers = c_header)
             """res = HTTP.Request('https://api.watcha.com/api/searches?query=%s' % (movie_name),
