@@ -17,6 +17,7 @@ class watcha:
         else:
             # 이부분 인코드가 관건인데..
             #movie_name = urllib.quote(keyword)
+            movie_name = keyword
             Log.Info(str(keyword))
             j = JSON.ObjectFromURL('https://api.watcha.com/api/searches?query=%s' % (movie_name),
                         headers = c_header)
