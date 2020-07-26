@@ -27,3 +27,7 @@ TMDb 컬렉션
 [다음영화](http://movie.daum.net)에서 영화/드라마 정보를 가져오는 Plex용 Metadata Agent입니다.
 
 [드라마를 위한 Metadata Agent](https://github.com/hojel/DaumMovieTv.bundle)가 따로 있었으나 통합됨.
+
+# Thanks to
+
+Soju6jan
