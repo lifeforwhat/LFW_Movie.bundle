@@ -2,6 +2,9 @@
 # Daum Movie
  
 import urllib, unicodedata, traceback, re
+# 추가
+import watcha
+import tmdb
 
 DAUM_MOVIE_SRCH   = "http://movie.daum.net/data/movie/search/v2/%s.json?size=20&start=1&searchText=%s"
 
@@ -14,7 +17,7 @@ from movie import searchMovie
 
 @route('/version') 
 def version():
-    return '2020-07-06'
+    return '2020-07-27'
 
 def Start():
     #HTTP.CacheTime = CACHE_1HOUR * 12
@@ -234,10 +237,148 @@ def updateDaumMovie(cate, metadata):
             poster = HTTP.Request( poster_url )
             try: metadata.posters[poster_url] = Proxy.Media(poster)
             except: pass
-    
+
+    ################ LifeForWhat 추가부분
+    watcha_headers = {
+        'accept': 'application/vnd.frograms+json;version=20',
+        'accept-encoding': 'gzip, deflate, br',
+        'accept-language': 'ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7',
+        'origin': 'https://watcha.com',
+        'sec-fetch-mode': 'cors',
+        'sec-fetch-site': 'same-site',
+        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.130 Safari/537.36',
+        'x-watcha-client': 'watcha-WebApp',
+        'x-watcha-client-language': 'ko',
+        'x-watcha-client-region': 'KR',
+        'x-watcha-client-version': '1.0.0'
+    }
+    movie_name = unicodedata.normalize('NFKC', unicode("기생충")).strip()
+    page = HTTP.Request('https://api.watcha.com/api/searches?query=%s' % (movie_name),
+                        headers = watcha_headers)
+    Log.Info(str(page))
+
+    # 리뷰 클리어
+
+
+    metadata.reviews.clear()
+
+    # 컬렉션 클리어
+    metadata.collections.clear()
+
+    # tmdb collection 을 먼저 찾는다.
+    tmdb_title_for_search = metadata.original_title
+    tmdb_year = metadata.year
+    j , c = tmdb.tmdb().search(name=tmdb_title_for_search , year=tmdb_year)
+    # TAG (TMDB 시리즈 + 왓챠)
+    #Log.Info(str(j, c))
+    try:
+        #tmdb_collection = d['tmdb_series']['name']
+        tmdb_collection = c['name']
+        if tmdb_collection != "":
+            metadata.collections.add('💿 ' +tmdb_collection)
+    except Exception as e:
+        Log.Info(str(e))
+        pass
+    # Watcha
+    try:
+
+        Log.Info('WATCHA SEARCHING TITLE : ' + metadata.title)
+        Log.Info('WATCHA SEARCHING YEAR : ' + str(metadata.year))
+        w = watcha.watcha(keyword = metadata.title, year=int(metadata.year), media_type='movies')
+        w2 = w.info
+        Log.Info('WATCHA SEARCHED TITLE : ' + str(w2['API_INFO']['title']))
+        Log.Info('WATCHA SEARCHED YEAR : ' + str(w2['API_INFO']['year']))
+        for item in w2['코멘트']:
+            # ⭐
+            wname = ''
+            wsource = u'왓챠'
+            wtext = ''
+            wline = ''
+            wimage = ''
+            offiYN = item['user']['official_user']
+            if offiYN == True:
+                wname = item['user']['name']
+                wtext = item['text']
+                wimage = item['user_content_action']['rating']
+                if wname != "" and wtext != "" and wimage != "":
+                    meta_review = metadata.reviews.new()
+                    meta_review.author = wname
+                    meta_review.source = u'왓챠'
+                    meta_review.text = '⭐ '+ str(wimage) + ' | '+ wtext
+                    meta_review.link = 'https://www.watcha.com/'
+                    if float(wimage) >= 6:
+                        meta_review.image = 'rottentomatoes://image.review.fresh'
+                    else:
+                        meta_review.image = 'rottentomatoes://image.review.rotten'
+        # 이제 Collection 파트
+
+        whitelist = ['수상', '아카데미', '영화제']
+        blacklist_keyword = ['여성', '여자', '페미', '소장', '메모', '소장', '베스트', '내가', '나의', '최고', '본 영화', '보물', '볼 영화',
+                             '관람', '감상', '본것', '내 영화']
+        blacklist_user = ['유정']
+        try:
+            d = {'watcha' : w2}
+            # 복붙하느라...
+            temp_list = d['watcha']['컬렉션']
+        except:
+            temp_list = []
+        collections = []
+        # 콜렉션용 각종 조건들을 붙인다...
+        # 페미니스트가 너무 많음.. 왓챠에는..
+        for coll in temp_list:
+            for white in whitelist:
+                if white in coll['title'] or coll['likes_count'] > 8000:
+                    collections.append(coll['title'])
+                    break
+
+        for coll in temp_list:
+            if coll['likes_count'] < 100:
+                continue  # 좋아요가 100개 미만은 버린다.
+            keep_going = False
+            years_list = re.findall('\d{4}', coll['title'])
+            years_list = [item for item in years_list if int(item) > 1890 and int(item) < 2030]
+            if len(years_list) > 0:
+                continue  # 년도가 들어간 건 버린다
+            if keep_going == False:
+                for black in blacklist_keyword:
+                    if black in coll['title'].replace('  ', ' '):
+                        keep_going = True
+                        break
+
+            if keep_going == False:
+                for blackuser in blacklist_user:
+                    if blackuser in coll['user']['name']:
+                        keep_going = True
+                        break
+
+            if keep_going == False and coll['title'] not in collections:
+                collections.append(coll['title'])
+        #Log.Error(str(collections))
+        for collection in collections:
+            temp_string = collection
+            if temp_string.count('수상') > 0:
+                temp_string = "🏆 " + temp_string
+            elif temp_string.count('후보') > 0:
+                temp_string = "🏆 " + temp_string
+            elif temp_string.count('대상') > 0:
+                temp_string = "🏆 " + temp_string
+            elif temp_string.count('주연상') > 0:
+                try:
+                    temp_string = "🏆 " + temp_string
+                except:
+                    #Log.Info(str(temp_string))
+                    pass
+            else:
+                temp_string = "🎬 " + temp_string
+            metadata.collections.add(temp_string)
+    except Exception as e:
+        import traceback
+        Log.Info(str(e))
+        Log.Info(traceback.print_exc)
+
 ####################################################################################################
 class SJ_DaumMovieAgent(Agent.Movies):
-    name = "SJ Daum"  
+    name = "SJ Daum"
     languages = [Locale.Language.Korean]
     primary_provider = True
     accepts_from = ['com.plexapp.agents.localmedia', 'com.plexapp.agents.xbmcnfo', 'com.plexapp.agents.opensubtitles', 'com.plexapp.agents.themoviedb']
