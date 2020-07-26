@@ -9,6 +9,7 @@ TMDb 컬렉션
 
 왓챠 평론가 평론 (Official_user == True)
 
+왓챠 컬렉션 블랙리스트 (아직 작동 X)
 
 # TODO
 왓챠 개인별 점수 컬렉션화
