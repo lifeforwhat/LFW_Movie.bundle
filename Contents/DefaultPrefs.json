@@ -3,7 +3,7 @@
     "id": "end_noti_filepath",
     "label": "TV쇼 [종영] 표시할 파일의 위치. 이 위치 안에 있는 쇼가 종영하면 타이틀에 [종영]표시가 추가됨. 2개 이상일 경우 구분자는 ,. 한글이 포함되어 있으면 에러가 발생하는데 일단 한글을 뺴고 저장한 후 Plex Media Server/Plug-in Support/Preferences/com.plexapp.agents.sj_daum.xml 파일에 수동으로 넣어주세요.",
     "type": "text",
-		"default": ""
+    "default": ""
   },
   {
 		"id": "include_time_info",
@@ -15,13 +15,13 @@
     "id": "max_episode_count",
     "label": "쇼 메타 검색시 가져올 에피소드 수. 0이면 제한 없음.",
     "type": "text",
-		"default": "300"
+    "default": "300"
   },
   {
     "id": "cookie",
     "label": "HTTP Cookie",
     "type": "text",
-		"default": "TIARA=gaXEIPluo-wWAFlwZN6l8gN3yzhkoo_piP.Kymhuy.6QBt4Q6.cRtxbKDaWpWajcyteRHzrlTVpJRxLjwLoMvyYLVi_7xJ1L"
+    "default": "TIARA=gaXEIPluo-wWAFlwZN6l8gN3yzhkoo_piP.Kymhuy.6QBt4Q6.cRtxbKDaWpWajcyteRHzrlTVpJRxLjwLoMvyYLVi_7xJ1L"
   },
   {
     "id": "max_num_posters",
@@ -39,8 +39,33 @@
   },
   {
     "id": "collection_black_keyword",
-    "label": "왓챠 컬렉션 차단 키워드, | 로 구분",
+    "label": "_____________________________________________________________________________________\n왓챠 컬렉션 차단 키워드, | 로 구분",
     "type": "text",
     "default": "페미|여성주의|나의|나만의"
+  },
+  {
+    "id": "black_critic",
+    "label": "특정 평론가 차단 키워드, | 로 구분",
+    "type": "text",
+    "default": "황혜미|이주현"
+  },
+  {
+    "id": "thresh_hold_point",
+    "label": "평론가들이 매긴 평점에서 몇 점 이상이어야지 신선한 토마토로 선택되는지",
+    "type": "enum",
+    "values": [ "1", "2", "3" ,"4" ,"5" , "6", "7" ,"8", "9" , "10" ],
+    "default": "7"
+  },
+  {
+    "id": "w_cookie",
+    "label": "*고급 사용자용. 왓챠 쿠키.",
+    "type": "text",
+    "default": ""
+  },
+  {
+    "id": "w_collection_by_flavor",
+    "label": "왓챠 개인 예상 점수 컬렉션화 (쿠키 필요)",
+    "type": "bool",
+    "default": "true"
   }
 ]
