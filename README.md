@@ -28,10 +28,12 @@ TMDb 컬렉션
 
 왓챠 점수 덮어씌우기
 
-# 원본
-[다음영화](http://movie.daum.net)에서 영화/드라마 정보를 가져오는 Plex용 Metadata Agent입니다.
+# 왓챠 쿠키 얻는 법
 
-[드라마를 위한 Metadata Agent](https://github.com/hojel/DaumMovieTv.bundle)가 따로 있었으나 통합됨.
+![image](https://user-images.githubusercontent.com/59600370/88553501-50d81e00-d060-11ea-9eb1-b0d99f0935b2.png)
+
+크롬 개발자모드(F12) 들어가셔서 Network 들어가신 후 찾으시면 됩니다.
+
 
 # Thanks to
 
