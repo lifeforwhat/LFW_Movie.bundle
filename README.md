@@ -1,8 +1,7 @@
 ![int3](https://user-images.githubusercontent.com/59600370/88552620-449f9100-d05f-11ea-8b15-9366dc45c1f6.png)
 ![int4](https://user-images.githubusercontent.com/59600370/88552633-48cbae80-d05f-11ea-9e65-df78d40cb328.png)
 ![image](https://user-images.githubusercontent.com/59600370/88553054-d0192200-d05f-11ea-81b7-569039cfe1c1.png)
-
-
+![1595863356064](https://user-images.githubusercontent.com/59600370/88560154-baf4c100-d068-11ea-9d07-0c20be826cbb.jpg)
 
 # 기존 SJ_Daum.bundle 과의 차이점
 
