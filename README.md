@@ -35,13 +35,13 @@ TMDb 컬렉션
 
 ## 자세한 왓챠 쿠키 얻는 법
 
-![image](https://user-images.githubusercontent.com/59600370/88563321-d1048080-d06c-11ea-8538-5d06acd48e79.png)
-
 1) https://pedia.watcha.com/ko-KR/contents/m5ewr3z 해당 페이지에 들어갑니다. 로그인이 되어있어야만 합니다.
 
 2) F12를 누릅니다.
 
 3) Network 탭에 들어갑니다.
+
+![image](https://user-images.githubusercontent.com/59600370/88563497-01e4b580-d06d-11ea-8739-83680229b0eb.png)
 
 4) Name 탭에 m5ewr3z 항목을 찾습니다.
 
