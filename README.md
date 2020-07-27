@@ -33,6 +33,21 @@ TMDb 컬렉션
 
 크롬 개발자모드(F12) 들어가셔서 Network 들어가신 후 찾으시면 됩니다.
 
+## 자세한 왓챠 쿠키 얻는 법
+
+![image](https://user-images.githubusercontent.com/59600370/88563321-d1048080-d06c-11ea-8538-5d06acd48e79.png)
+
+1) https://pedia.watcha.com/ko-KR/contents/m5ewr3z 해당 페이지에 들어갑니다. 로그인이 되어있어야만 합니다.
+
+2) F12를 누릅니다.
+
+3) Network 탭에 들어갑니다.
+
+4) Name 탭에 m5ewr3z 항목을 찾습니다.
+
+5) 오른쪽 탭(Headers)에서 Requests Headers 항목에서 cookie 값을 복사한 뒤 설정에 붙여넣습니다.
+
+
 
 # Thanks to
 
