@@ -11,26 +11,42 @@ except:
     Log.Info('requests not imported')
 from time import sleep
 
+
+c_header = {
+            'accept': 'application/vnd.frograms+json;version=20',
+            'accept-encoding': 'gzip, deflate, br',
+            'accept-language': 'ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7',
+            'origin': 'https://watcha.com',
+            'sec-fetch-mode': 'cors',
+            'sec-fetch-site': 'same-site',
+            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.130 Safari/537.36',
+            'x-watcha-client': 'watcha-WebApp',
+            'x-watcha-client-language': 'ko',
+            'x-watcha-client-region': 'KR',
+            'x-watcha-client-version': '1.0.0'
+        }
+if Prefs['w_cookie'] != "":
+    c_header['cookie'] = Prefs['w_cookie']
+
 class watcha:
     def __init__(self, keyword , year=None , year_diff_allow = 1 , media_type='top'): # media_type 에 따라서 movie, tv 를 결정해준다. 정 모르겠으면 top으로 설정할 것.
         if plex == False:
-            res = requests.get('https://api.watcha.com/api/searches?query='+keyword, headers = c_header)
+            res = requests.get('https://api.watcha.com/api/searches/contents/movies?query='+keyword, headers = c_header)
             j = res.json()
         else:
             movie_name = urllib.quote(keyword.encode('utf8'))
             Log.Info(str(keyword))
-            j = JSON.ObjectFromURL('https://api.watcha.com/api/searches?query=%s' % (movie_name),
+            j = JSON.ObjectFromURL('https://api.watcha.com/api/searches/contents/movies?query=%s' % (movie_name),
                         headers = c_header)
-            """res = HTTP.Request('https://api.watcha.com/api/searches?query=%s' % (movie_name),
-                        headers = c_header)"""
             Log.Info(str(j))
 
-        if media_type == "top":
+        """if media_type == "top":
             result = j['result']['top_results']
         elif media_type == "movies":
             result = j['result']['movies']
         elif media_type == "tv":
-            result = j['result']['tv_seasons']
+            result = j['result']['tv_seasons']"""
+        result = j['result']['result']
 
         if year != None: # year값이 주어졌다면 year로 비교해준다.
             year = int(year)
@@ -47,6 +63,12 @@ class watcha:
             diction['컬렉션'] = self.collection(best_code)
             diction['API_INFO'] = self.api_info(best_code)
             self.info = diction
+            try:
+                Log.Info("BESTINFO")
+                Log.Info(str(best['current_context']['predicted_rating']))
+                self.predicted_rating = best['current_context']['predicted_rating']
+            except:
+                self.predicted_rating = ""
         except IndexError:
             print("NOTHING FOUND (%s)" % (keyword))
 
@@ -56,7 +78,7 @@ class watcha:
             j = res.json()
         else :
             j = JSON.ObjectFromURL('https://api.watcha.com/api/contents/'+code , headers= c_header)
-            Log.Info(str(j))
+            #Log.Info(str(j))
         return j['result']
 
     def collection(self, code, amount = 100): # amount 는 페이지당 20이 api의 최대값인가본데, 억지로 끌어온다
@@ -67,7 +89,7 @@ class watcha:
                 j = res.json()
             else:
                 j = JSON.ObjectFromURL(base_url, headers=c_header)
-                Log.Info(str(j))
+                #Log.Info(str(j))
             result = j['result']['result']
             return result
         else:
@@ -85,7 +107,7 @@ class watcha:
                         j = JSON.ObjectFromURL(base_url, headers=c_header)
                     except:
                         break
-                    Log.Info(str(j))
+                    #Log.Info(str(j))
 
                 result += j['result']['result']
                 if len(result) >= amount or len(j['result']['result']) == 0:
@@ -118,7 +140,7 @@ class watcha:
                         j = JSON.ObjectFromURL(base_url, headers=c_header)
                     except:
                         break
-                    Log.Info(str(j))
+                    #Log.Info(str(j))
                 result += j['result']['result']
                 if len(result) >= amount or len(j['result']['result']) == 0 :
                     break
@@ -150,7 +172,7 @@ class watcha:
                         j = JSON.ObjectFromURL(base_url, headers=c_header)
                     except:
                         break
-                    Log.Info(str(j))
+                    #Log.Info(str(j))
                 result += j['result']['result']
                 if len(result) >= amount or len(j['result']['result']) == 0:
                     break
@@ -158,19 +180,6 @@ class watcha:
             return result
 
 
-c_header = {
-            'accept': 'application/vnd.frograms+json;version=20',
-            'accept-encoding': 'gzip, deflate, br',
-            'accept-language': 'ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7',
-            'origin': 'https://watcha.com',
-            'sec-fetch-mode': 'cors',
-            'sec-fetch-site': 'same-site',
-            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.130 Safari/537.36',
-            'x-watcha-client': 'watcha-WebApp',
-            'x-watcha-client-language': 'ko',
-            'x-watcha-client-region': 'KR',
-            'x-watcha-client-version': '1.0.0'
-        }
 
 if __name__ == '__main__':
     a = watcha(keyword='알라딘' ,year=2019 , media_type='movies')

@@ -5,6 +5,7 @@ import urllib, unicodedata, traceback, re
 # 추가
 import watcha
 import tmdb
+import naver
 
 DAUM_MOVIE_SRCH   = "http://movie.daum.net/data/movie/search/v2/%s.json?size=20&start=1&searchText=%s"
 
@@ -283,11 +284,21 @@ def updateDaumMovie(cate, metadata):
 
     # Watcha
     try:
-
         Log.Info('WATCHA SEARCHING TITLE : ' + metadata.title)
         Log.Info('WATCHA SEARCHING YEAR : ' + str(metadata.year))
         w = watcha.watcha(keyword = metadata.title, year=int(metadata.year), media_type='movies')
         w2 = w.info
+        if Prefs['w_collection_by_flavor'] == True and Prefs['w_cookie'] != "":
+            try:
+                predicted_point = w.predicted_rating
+                temp_string = "⭐ 왓챠 예상 별점 : %s" % str(round((predicted_point / 2) , 1) )
+                metadata.collections.add(temp_string)
+                Log.Info("예상별점")
+                Log.Info(temp_string)
+            except Exception as e :
+                import traceback
+                Log.Info(str(e))
+                Log.Info(str(traceback.print_exc))
         Log.Info('WATCHA SEARCHED TITLE : ' + str(w2['API_INFO']['title']))
         Log.Info('WATCHA SEARCHED YEAR : ' + str(w2['API_INFO']['year']))
         for item in w2['코멘트']:
@@ -300,15 +311,17 @@ def updateDaumMovie(cate, metadata):
             offiYN = item['user']['official_user']
             if offiYN == True:
                 wname = item['user']['name']
+                if wname in Prefs['black_critic']:
+                    continue
                 wtext = item['text']
                 wimage = item['user_content_action']['rating']
                 if wname != "" and wtext != "" and wimage != "":
                     meta_review = metadata.reviews.new()
                     meta_review.author = wname
                     meta_review.source = u'왓챠'
-                    meta_review.text = '⭐ '+ str(wimage) + ' | '+ wtext
+                    meta_review.text = '⭐ '+ str(wimage) + ' | '+ wtext.replace('<' ,'〈').replace('>','〉')
                     meta_review.link = 'https://www.watcha.com/'
-                    if float(wimage) >= 6:
+                    if float(wimage) >= float(Prefs['thresh_hold_point']):
                         meta_review.image = 'rottentomatoes://image.review.fresh'
                     else:
                         meta_review.image = 'rottentomatoes://image.review.rotten'
@@ -356,6 +369,7 @@ def updateDaumMovie(cate, metadata):
             if keep_going == False and coll['title'] not in collections:
                 collections.append(coll['title'])
         #Log.Error(str(collections))
+        final_black_list_keyword_list = Prefs['collection_black_keyword'].split('|')
         for collection in collections:
             temp_string = collection
             if temp_string.count('수상') > 0:
@@ -372,11 +386,48 @@ def updateDaumMovie(cate, metadata):
                     pass
             else:
                 temp_string = "🎬 " + temp_string
+            # 최종 블랙리스트로 거른다.
+            for item in final_black_list_keyword_list:
+                if item in temp_string:
+                    Log.Info(temp_string)
+                    Log.Info(item)
+                    temp_string = ""
+                    continue
+            if temp_string == "":
+                continue
             metadata.collections.add(temp_string)
     except Exception as e:
         import traceback
         Log.Info(str(e))
         Log.Info(traceback.print_exc)
+
+    # 네이버 파트
+    naver_result = naver.search(keyword=metadata.title, year=int(metadata.year))
+    crtics_naver = naver.critics(naver_result['code'])
+    for item in crtics_naver:
+        # ⭐
+        wname = ''
+        wsource = u'네이버'
+        wtext = ''
+        wline = ''
+        wimage = ''
+        wname = item['name']
+        if wname in Prefs['black_critic']:
+            continue
+        wtext = item['text']
+        wimage = item['score']
+        if wname != "" and wtext != "" and wimage != "":
+            meta_review = metadata.reviews.new()
+            meta_review.author = wname
+            meta_review.source = u'네이버'
+            Log.Info(str(wtext))
+            meta_review.text = '⭐ ' + str(wimage) + ' | ' + wtext.replace('<' ,'〈').replace('>','〉')
+            meta_review.link = 'https://www.watcha.com/'
+            if float(wimage) >= float(Prefs['thresh_hold_point']):
+                meta_review.image = 'rottentomatoes://image.review.fresh'
+            else:
+                meta_review.image = 'rottentomatoes://image.review.rotten'
+
 
 ####################################################################################################
 class SJ_DaumMovieAgent(Agent.Movies):
