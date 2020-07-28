@@ -50,6 +50,10 @@ def critics(code):
             wtext = html.xpath('//*[@id="content"]/div[1]/div[4]/div[4]/div/div[2]/ul/li[%s]/div[1]/dl/dd' % str(i + 1))[0].text_content()
             wscore = html.xpath('//*[@id="content"]/div[1]/div[4]/div[4]/div/div[2]/ul/li[%s]/div[2]/div/div/em' % str(i + 1))[0].text_content()
             result.append({'name' : wname , 'score' : wscore , 'text' : wtext})
+            Log.Info(str(i))
+            Log.Info('이름 : ' + str(wname))
+            Log.Info('내용 : ' + str(wtext))
+            Log.Info('점수 : ' + str(wscore))
         except:
             continue
 
