@@ -47,12 +47,8 @@ def critics(code):
     for i, v in enumerate(reporters):
         try:
             wname = html.xpath('//*[@id="content"]/div[1]/div[4]/div[4]/div/div[2]/ul/li[%s]/div[1]/dl/dt/a' % str( i+1 ))[0].text_content()
-            wtext = \
-            html.xpath('//*[@id="content"]/div[1]/div[4]/div[4]/div/div[2]/ul/li[%s]/div[1]/dl/dd' % str(i + 1))[
-                0].text_content()
-            wscore = \
-                html.xpath('//*[@id="content"]/div[1]/div[4]/div[4]/div/div[3]/div/ul/li[%s]/div[1]/em' % str(i + 1))[
-                    0].text_content()
+            wtext = html.xpath('//*[@id="content"]/div[1]/div[4]/div[4]/div/div[2]/ul/li[%s]/div[1]/dl/dd' % str(i + 1))[0].text_content()
+            wscore = html.xpath('//*[@id="content"]/div[1]/div[4]/div[4]/div/div[2]/ul/li[%s]/div[2]/div/div/em' % str(i + 1))[0].text_content()
             result.append({'name' : wname , 'score' : wscore , 'text' : wtext})
         except:
             continue
