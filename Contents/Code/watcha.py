@@ -12,7 +12,9 @@ except:
 from time import sleep
 
 
-c_header = {
+class watcha:
+    def __init__(self, keyword , year=None , year_diff_allow = 1 , media_type='top' , cookie = False): # media_type 에 따라서 movie, tv 를 결정해준다. 정 모르겠으면 top으로 설정할 것.
+        self.c_header = {
             'accept': 'application/vnd.frograms+json;version=20',
             'accept-encoding': 'gzip, deflate, br',
             'accept-language': 'ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7',
@@ -23,21 +25,17 @@ c_header = {
             'x-watcha-client': 'watcha-WebApp',
             'x-watcha-client-language': 'ko',
             'x-watcha-client-region': 'KR',
-            'x-watcha-client-version': '1.0.0'
+            'x-watcha-client-version': '1.0.0',
+            'cookie' : cookie if cookie != False else ''
         }
-if Prefs['w_cookie'] != "":
-    c_header['cookie'] = Prefs['w_cookie']
-
-class watcha:
-    def __init__(self, keyword , year=None , year_diff_allow = 1 , media_type='top'): # media_type 에 따라서 movie, tv 를 결정해준다. 정 모르겠으면 top으로 설정할 것.
         if plex == False:
-            res = requests.get('https://api.watcha.com/api/searches/contents/movies?query='+keyword, headers = c_header)
+            res = requests.get('https://api.watcha.com/api/searches/contents/movies?query='+keyword, headers = self.c_header)
             j = res.json()
         else:
             movie_name = urllib.quote(keyword.encode('utf8'))
             Log.Info(str(keyword))
             j = JSON.ObjectFromURL('https://api.watcha.com/api/searches/contents/movies?query=%s' % (movie_name),
-                        headers = c_header)
+                        headers = self.c_header)
             Log.Info(str(j))
 
         """if media_type == "top":
@@ -74,10 +72,10 @@ class watcha:
 
     def api_info(self, code):
         if plex == False:
-            res = requests.get('https://api.watcha.com/api/contents/'+code , headers= c_header)
+            res = requests.get('https://api.watcha.com/api/contents/'+code , headers= self.c_header)
             j = res.json()
         else :
-            j = JSON.ObjectFromURL('https://api.watcha.com/api/contents/'+code , headers= c_header)
+            j = JSON.ObjectFromURL('https://api.watcha.com/api/contents/'+code , headers= self.c_header)
             #Log.Info(str(j))
         return j['result']
 
@@ -85,10 +83,10 @@ class watcha:
         if amount <= 20  :
             base_url = 'https://api.watcha.com/api/contents/'+code+'/decks?default_version=20&page=1&size='+str(amount)+'&vendor_string=frograms'
             if plex == False:
-                res = requests.get(base_url, headers = c_header)
+                res = requests.get(base_url, headers = self.c_header)
                 j = res.json()
             else:
-                j = JSON.ObjectFromURL(base_url, headers=c_header)
+                j = JSON.ObjectFromURL(base_url, headers=self.c_header)
                 #Log.Info(str(j))
             result = j['result']['result']
             return result
@@ -98,13 +96,13 @@ class watcha:
             while True:
                 base_url = 'https://api.watcha.com/api/contents/' + code + '/decks?default_version=20&page='+str(page)+'&size=20&vendor_string=frograms'
                 if plex == False:
-                    res = requests.get(base_url, headers=c_header)
+                    res = requests.get(base_url, headers=self.c_header)
                     if res.status_code != 200:
                         break
                     j = res.json()
                 else:
                     try:
-                        j = JSON.ObjectFromURL(base_url, headers=c_header)
+                        j = JSON.ObjectFromURL(base_url, headers=self.c_header)
                     except:
                         break
                     #Log.Info(str(j))
@@ -119,10 +117,10 @@ class watcha:
         if amount <= 20  :
             base_url = 'https://api.watcha.com/api/contents/'+code+'/credits?default_version=20&page=1&size=20&vendor_string=frograms'
             if plex == False:
-                res = requests.get(base_url , headers = c_header)
+                res = requests.get(base_url , headers = self.c_header)
                 j = res.json()
             else:
-                j = JSON.ObjectFromURL(base_url, headers=c_header)
+                j = JSON.ObjectFromURL(base_url, headers=self.c_header)
             result = j['result']['result']
             return result
         else:
@@ -131,13 +129,13 @@ class watcha:
             while True:
                 base_url = 'https://api.watcha.com/api/contents/'+code+'/credits?default_version=20&page='+str(page)+'&size=20&vendor_string=frograms'
                 if plex == False:
-                    res = requests.get(base_url, headers=c_header)
+                    res = requests.get(base_url, headers=self.c_header)
                     if res.status_code != 200:
                         break
                     j = res.json()
                 else:
                     try:
-                        j = JSON.ObjectFromURL(base_url, headers=c_header)
+                        j = JSON.ObjectFromURL(base_url, headers=self.c_header)
                     except:
                         break
                     #Log.Info(str(j))
@@ -151,10 +149,10 @@ class watcha:
         if amount <= 20  :
             base_url = 'https://api.watcha.com/api/contents/'+code+'/comments?default_version=20&filter=all&order='+str(style)+'&page=1&size='+str(amount)+'&vendor_string=frograms'
             if plex == False:
-                res = requests.get(base_url , headers = c_header)
+                res = requests.get(base_url , headers = self.c_header)
                 j = res.json()
             else:
-                j = JSON.ObjectFromURL(base_url, headers=c_header)
+                j = JSON.ObjectFromURL(base_url, headers=self.c_header)
             result = j['result']['result']
             return result
         else:
@@ -163,13 +161,13 @@ class watcha:
             while True:
                 base_url = 'https://api.watcha.com/api/contents/'+code+'/comments?default_version=20&filter=all&order='+str(style)+'&page='+str(page)+'&size='+str(amount)+'&vendor_string=frograms'
                 if plex == False:
-                    res = requests.get(base_url, headers=c_header)
+                    res = requests.get(base_url, headers=self.c_header)
                     if res.status_code != 200:
                         break
                     j = res.json()
                 else:
                     try:
-                        j = JSON.ObjectFromURL(base_url, headers=c_header)
+                        j = JSON.ObjectFromURL(base_url, headers=self.c_header)
                     except:
                         break
                     #Log.Info(str(j))

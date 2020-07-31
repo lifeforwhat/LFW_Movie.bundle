@@ -26,8 +26,8 @@ def Start():
     HTTP.Headers['User-Agent'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36'
     HTTP.Headers['Accept-Language'] = 'ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7'
     HTTP.Headers['Cookie'] = Prefs['cookie']
-  
-####################################################################################################
+
+    ####################################################################################################
 """
 def searchDaumMovie(cate, results, media, lang):
   media_name = media.name
@@ -240,27 +240,8 @@ def updateDaumMovie(cate, metadata):
             except: pass
 
     ################ LifeForWhat 추가부분
-    watcha_headers = {
-        'accept': 'application/vnd.frograms+json;version=20',
-        'accept-encoding': 'gzip, deflate, br',
-        'accept-language': 'ko-KR,ko;q=0.9,en-US;q=0.8,en;q=0.7',
-        'origin': 'https://watcha.com',
-        'sec-fetch-mode': 'cors',
-        'sec-fetch-site': 'same-site',
-        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.130 Safari/537.36',
-        'x-watcha-client': 'watcha-WebApp',
-        'x-watcha-client-language': 'ko',
-        'x-watcha-client-region': 'KR',
-        'x-watcha-client-version': '1.0.0'
-    }
-    """movie_name = unicodedata.normalize('NFKC', unicode("기생충")).strip()
-    page = HTTP.Request('https://api.watcha.com/api/searches?query=%s' % (movie_name),
-                        headers = watcha_headers)
-    Log.Info(str(page))"""
 
     # 리뷰 클리어
-
-
     metadata.reviews.clear()
 
     # 컬렉션 클리어
@@ -286,9 +267,10 @@ def updateDaumMovie(cate, metadata):
     try:
         Log.Info('WATCHA SEARCHING TITLE : ' + metadata.title)
         Log.Info('WATCHA SEARCHING YEAR : ' + str(metadata.year))
-        w = watcha.watcha(keyword = metadata.title, year=int(metadata.year), media_type='movies')
+        w_cookie = Prefs['w_cookie'] if Prefs['w_cookie'] != "" else ""
+        w = watcha.watcha(keyword = metadata.title, year=int(metadata.year), media_type='movies' , cookie = w_cookie)
         w2 = w.info
-        if Prefs['w_collection_by_flavor'] == True and Prefs['w_cookie'] != "":
+        if Prefs['w_collection_by_flavor'] == True and Prefs['w_cookie'] != "" and Prefs['w_private_point_collection_location'] == '제일 위':
             try:
                 predicted_point = w.predicted_rating
                 temp_string = "⭐ 왓챠 예상 별점 : %s" % str(round((predicted_point / 2) , 1) )
@@ -309,6 +291,8 @@ def updateDaumMovie(cate, metadata):
             wline = ''
             wimage = ''
             offiYN = item['user']['official_user']
+            if item['user']['name'] in Prefs['w_favorite_non_critics'].split(','):
+                offiYN = True
             if offiYN == True:
                 wname = item['user']['name']
                 if wname in Prefs['black_critic']:
@@ -342,7 +326,7 @@ def updateDaumMovie(cate, metadata):
         # 페미니스트가 너무 많음.. 왓챠에는..
         for coll in temp_list:
             for white in whitelist:
-                if white in coll['title'] or coll['likes_count'] > 8000:
+                if white in coll['title'] or coll['likes_count'] > int(Prefs['w_like']):
                     collections.append(coll['title'])
                     break
 
@@ -369,7 +353,7 @@ def updateDaumMovie(cate, metadata):
             if keep_going == False and coll['title'] not in collections:
                 collections.append(coll['title'])
         #Log.Error(str(collections))
-        final_black_list_keyword_list = Prefs['collection_black_keyword'].split('|')
+        final_black_list_keyword_list = Prefs['collection_black_keyword'].split(',')
         for collection in collections:
             temp_string = collection
             if temp_string.count('수상') > 0:
@@ -401,6 +385,21 @@ def updateDaumMovie(cate, metadata):
         Log.Info(str(e))
         Log.Info(traceback.print_exc)
 
+
+    if Prefs['w_collection_by_flavor'] == True and Prefs['w_cookie'] != "" and Prefs[
+        'w_private_point_collection_location'] == '제일 아래':
+        try:
+            predicted_point = w.predicted_rating
+            temp_string = "⭐ 왓챠 예상 별점 : %s" % str(round((predicted_point / 2), 1))
+            metadata.collections.add(temp_string)
+            Log.Info("예상별점")
+            Log.Info(temp_string)
+        except Exception as e:
+            import traceback
+
+            Log.Info(str(e))
+            Log.Info(str(traceback.print_exc))
+
     # 네이버 파트
     naver_result = naver.search(keyword=metadata.title, year=int(metadata.year))
     crtics_naver = naver.critics(naver_result['code'])
@@ -428,15 +427,70 @@ def updateDaumMovie(cate, metadata):
             else:
                 meta_review.image = 'rottentomatoes://image.review.rotten'
 
+    # Trailer 작동 잘 안 된다.
+    """extras = []
+    extras.append({'type': 'primary_trailer',
+               'lang': "KO",
+               'extra': TrailerObject(
+                   url="http://cdn.videofarm.daum.net/vod/v3162VZTJJCCDo7JCnmFTF7/mp4_1280_720_2M/movie.mp4?px-bps=5661921&px-bufahead=10&px-time=1596103735&px-hash=fc809da355acd1f0d9012e7f24652614",
+                   title='test',
+                   year=2017,
+                   thumb='')})
+    for extra in extras:
+        metadata.extras.add(extra['extra'])"""
+
+    # IMDb 파트
+    if Prefs['imdb_rating'] == True:
+        q = metadata.original_title.strip() if metadata.original_title.count(',') == 0 else metadata.original_title.split(',')[0].strip()
+        year = metadata.year
+        # https://v2.sg.media-imdb.com/suggestion/p/peninsula.json
+        baseURL = "https://v2.sg.media-imdb.com/suggestion/%s/%s.json"
+        data = JSON.ObjectFromURL(url=baseURL % (q[0].lower() , q.replace(' ', '_').lower() ))['d']
+        True_Item = False
+        for item in data:
+            try:
+                if int(item['y']) == int(year):
+                    True_Item = item
+            except:
+                continue
+        for item in data:
+            try:
+                if abs(int(item['y']) - int(year)) <= 1 :
+                    True_Item = item
+                    break # 1년차이까지는 괜찮아.
+            except:
+                continue
+        imdb_code = item['id']
+        imdb_url = 'https://www.imdb.com/title/%s' % imdb_code
+        root = HTML.ElementFromURL(imdb_url)
+        imdb_rating = root.xpath('//*[@id="title-overview-widget"]/div[1]/div[2]/div/div[1]/div[1]/div[1]/strong/span')[0].text_content()
+        if imdb_rating:
+            metadata.rating = float(imdb_rating)
+            metadata.rating_image = 'imdb://image.rating'
+            if Prefs['imdb_rating_text_and_collection'] != "":
+                tmp = Prefs['imdb_rating_text_and_collection']
+                tmp = tmp.split(',')
+                tmp = [item.split('[') for item in tmp]
+                score = float(imdb_rating)
+                for item in tmp:
+                    if float(item[0].split('~')[0]) <= score <= float(item[0].split('~')[1]):
+                        metadata.collections.add('🟨 ' + item[1].replace(']','').strip())
+                        break
+
+    # "6.5~7.0[🟨 IMDb 7 ▼],7.1~7.9[🟨 IMDb 7.1~7.9],8.0~9.9[🟨 IMDB 8.0~]"
+
 
 ####################################################################################################
 class SJ_DaumMovieAgent(Agent.Movies):
-    name = "SJ Daum"
+    name = "LFW Movie"
     languages = [Locale.Language.Korean]
     primary_provider = True
     accepts_from = ['com.plexapp.agents.localmedia', 'com.plexapp.agents.xbmcnfo', 'com.plexapp.agents.opensubtitles', 'com.plexapp.agents.themoviedb']
     contributes_to = ['com.plexapp.agents.xbmcnfo']
-    fallback_agent = 'com.plexapp.agents.imdb'
+    if Prefs['fallback_agent'] == 'imdb':
+        fallback_agent = 'com.plexapp.agents.imdb'
+    if Prefs['fallback_agent'] == 'tmdb':
+        fallback_agent = 'com.plexapp.agents.themoviedb'
     def search(self, results, media, lang, manual=False):
         return searchMovie(results, media, lang)
 
@@ -446,7 +500,7 @@ class SJ_DaumMovieAgent(Agent.Movies):
 
 
 class SJ_DaumTvAgent(Agent.TV_Shows):
-    name = "SJ Daum"
+    name = "LFW Movie"
     primary_provider = True
     languages = [Locale.Language.Korean]
     accepts_from = ['com.plexapp.agents.localmedia', 'com.plexapp.agents.xbmcnfotv']
