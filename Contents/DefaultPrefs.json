@@ -1,114 +1,124 @@
-[{
-		"id": "end_noti_filepath",
-		"label": "TV쇼 [종영] 표시할 파일의 위치. 이 위치 안에 있는 쇼가 종영하면 타이틀에 [종영]표시가 추가됨. 2개 이상일 경우 구분자는 ,. 한글이 포함되어 있으면 에러가 발생하는데 일단 한글을 뺴고 저장한 후 Plex Media Server/Plug-in Support/Preferences/com.plexapp.agents.sj_daum.xml 파일에 수동으로 넣어주세요.",
-		"type": "text",
-		"default": ""
-	},
-	{
-		"id": "include_time_info",
-		"label": "영화 재생 버전을 분리하여 추가.",
-		"type": "bool",
-		"default": "False"
-	},
-	{
-		"id": "max_episode_count",
-		"label": "쇼 메타 검색시 가져올 에피소드 수. 0이면 제한 없음.",
-		"type": "text",
-		"default": "300"
-	},
-	{
-		"id": "cookie",
-		"label": "HTTP Cookie",
-		"type": "text",
-		"default": "TIARA=gaXEIPluo-wWAFlwZN6l8gN3yzhkoo_piP.Kymhuy.6QBt4Q6.cRtxbKDaWpWajcyteRHzrlTVpJRxLjwLoMvyYLVi_7xJ1L"
-	},
-	{
-		"id": "max_num_posters",
-		"label": "Maximum Number of Posters",
-		"type": "enum",
-		"values": ["5", "10", "20"],
-		"default": "5"
-	},
-	{
-		"id": "max_num_arts",
-		"label": "Maximum Number of Arts",
-		"type": "enum",
-		"values": ["5", "10", "20"],
-		"default": "5"
-	},
-	{
-		"id": "collection_black_keyword",
-		"label": "_____________________________________________________________________________________\n왓챠 컬렉션 차단 키워드. 쉼표로 구분 (,)",
-		"type": "text",
-		"default": "페미,여성주의,나의,나만의"
-	},
-	{
-		"id": "black_critic",
-		"label": "특정 평론가 차단 키워드. 쉼표(,) 로 구분",
-		"type": "text",
-		"default": "황혜미,이주현"
-	},
-	{
-		"id": "w_favorite_non_critics",
-		"label": "왓챠 평론가 아니더라도 추가할 코멘트 (유저 이름) 쉼표로 구분",
-		"type": "text",
-		"default": "Cinephile"
-	},
-	{
-		"id": "thresh_hold_point",
-		"label": "몇 점 이상이어야지 신선한 토마토로 선택되는지",
-		"type": "enum",
-		"values": ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"],
-		"default": "7"
-	},
-	{
-		"id": "w_cookie",
-		"label": "*고급 사용자용. 왓챠 쿠키.",
-		"type": "text",
-		"default": ""
-	},
-	{
-		"id": "w_collection_by_flavor",
-		"label": "왓챠 개인 예상 점수 컬렉션화 (쿠키 필요)",
-		"type": "bool",
-		"default": "true"
-	},
-	{
-		"id": "w_private_point_collection_location",
-		"label": "왓챠 예상 점수 컬렉션 위치 지정",
-		"type": "enum",
-		"values": ["제일 위", "제일 아래"],
-		"default": "제일 아래"
-	},
-	{
-		"id": "w_like",
-		"label": "특정 좋아요 수치 이상인 경우 무조건 컬렉션 추가",
-		"type": "text",
-		"default": "8000"
-	},
-	{
-		"id": "imdb_rating",
-		"label": "imdb 평점을 찾고 덮어씌운다. 찾지 못한다면 Daum 점수를 가져온다.",
-		"type": "bool",
-		"default": "false"
-	},
-	{
-		"id": "imdb_rating_text_and_collection",
-		"label": "imdb 특정 평점 범위마다 컬렉션을 형성해준다. 문법은 기본값 참조. 구분자는 쉼표. 블랭크일 경우 생성하지 않음. 앞에는 자동으로 도형 추가.",
-		"type": "text",
-		"default": "6.5~7.0[IMDb 6.5~7.0],7.1~7.9[IMDb 7.1~7.9],8.0~9.9[IMDB 8.0~]"
-	},
-	{
-		"id": "fallback_agent",
-		"label": "fallback. 매칭 실패시 어떤 에이전트로 넘길지",
-		"type": "enum",
-		"values": ["not fallback","imdb", "tmdb"],
-		"default": "not fallback"
-	},
-	{
-		"id": "wiki_url",
-		"label": "_____________________________________________________________________________________\n*고급 사용자용. 참조 구글 docs(개발 중).",
-		"type": "text",
-		"default": ""
-	}
+
+[
+  {
+    "id":"debug",
+    "label":"Enable debug logging",
+    "type":"bool",
+    "default":"false"
+  },
+  {
+    "id":"dayfirst",
+    "label":"Enable day first in ambiguous dates",
+    "type":"bool",
+    "default":"false"
+  },
+  {
+    "id":"plot",
+    "label":"Use plot instead of outline\n_____________________________________________________________________________________",
+    "type":"bool",
+    "default":"false"
+  },
+  {
+    "id":"localmediaagent",
+    "label":"Disable local media support for artwork, trailers and subtitles (use local media assets instead)",
+    "type":"bool",
+    "default":"false"
+  },
+  {
+    "id":"trailer",
+    "label":"Enable trailer support",
+    "type":"bool",
+    "default":"false"
+  },
+  {
+    "id":"subtitle",
+    "label":"Enable subtitle file support",
+    "type":"bool",
+    "default":"false"
+  },
+  {
+    "id":"subglobalpath",
+    "label":"Path to global subtitle folder (Leave blank if none)",
+    "type":"text",
+    "default":""
+  },
+  {
+    "id":"beforerating",
+    "label":"_____________________________________________________________________________________\nText before rating (supports html specialchars!):",
+    "type":"text",
+    "default":"&#9733; "
+  },
+  {
+    "id":"afterrating",
+    "label":"Text after rating (supports html specialchars!):",
+    "type":"text",
+    "default":" | "
+  },
+  {
+    "id":"preserverating",
+    "label":"Pad .nfo rating with texts above and place it in front of summary\n_____________________________________________________________________________________",
+    "type":"bool",
+    "default":"false"
+  },
+  {
+    "id":"tlinsummary",
+    "label":"Show tagline in front of summary\n_____________________________________________________________________________________",
+    "type":"bool",
+    "default":"false"
+  },
+  {
+    "id":"ratings",
+    "label":"Restrict additional ratings to identifiers separated by comma (eg: IMDb, RT). If left empty all ratings found will be included.",
+    "type":"text",
+    "default":""
+  },
+  {
+    "id":"ratingspos",
+    "label":"position for additional ratings in summary",
+    "type": "enum",
+    "values": [
+      "front",
+      "back"
+    ],
+    "default": "back"
+  },
+  {
+    "id":"altratings",
+    "label":"Enable additional ratings support\n_____________________________________________________________________________________",
+    "type":"bool",
+    "default":"false"
+  },
+  {
+    "id": "country",
+    "label": "Country (used for content rating)",
+    "type": "enum",
+    "values": [
+      "",
+      "Australia",
+      "Canada",
+      "France",
+      "Germany",
+      "Netherlands",
+      "United Kingdom",
+      "United States"
+    ],
+    "default": ""
+  },
+  {
+    "id":"athumblocation",
+    "label":"actor thumb location",
+    "type": "enum",
+    "values": [
+      "link",
+      "local",
+      "global"
+    ],
+    "default": "link"
+  },
+  {
+    "id":"athumbpath",
+    "label":"path to movie library or global actor folder",
+    "type":"text",
+    "default":"http://localhost"
+  }
 ]
