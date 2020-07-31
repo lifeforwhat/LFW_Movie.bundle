@@ -63,6 +63,37 @@ TMDb 컬렉션
 
 5) 오른쪽 탭(Headers)에서 Requests Headers 항목에서 cookie 값을 복사한 뒤 설정에 붙여넣습니다.
 
+# FAQ
+
+## 에이전트가 나타나지 않습니다.
+
+.xml 파일이 형성되지 않은 것으로 보입니다.
+
+에이전트 > 영화 > The Movie Database 에이전트에 들어간 후 아래에 나타나는 LFW Movie 옆 톱니바퀴를 눌러 .xml 파일을 생성해 줍니다.
+
+![image](https://user-images.githubusercontent.com/59600370/89057836-4471ff00-d399-11ea-9288-a43c2da0ce96.png)
+
+그리고 PMS 를 재시작하면 영화 에이전트 내에서 LFW Movie 에이전트가 나타납니다.
+
+
+
+## 설정이 저장되지 않습니다.
+
+이는 한글 때문에 저장이 되지 않는 것입니다.
+
+xml 파일을 직접 수정해주시면 됩니다.
+
+윈도우를 기준으로 아래의 경로에 존재합니다.
+
+![image](https://user-images.githubusercontent.com/59600370/89057975-73887080-d399-11ea-9d0c-19c83e298f9f.png)
+
+파일을 열어서 수정하시면 됩니다.
+
+
+![image](https://user-images.githubusercontent.com/59600370/89058056-9a46a700-d399-11ea-87e7-5da6a17afd6e.png)
+
+아래와 같은 규칙으로 되어있으니, 구분자에 맞게끔 원하는 대로 수정하시길 바랍니다.
+
 
 
 # Thanks to
