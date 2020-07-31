@@ -486,7 +486,7 @@ class SJ_DaumMovieAgent(Agent.Movies):
     languages = [Locale.Language.Korean]
     primary_provider = True
     accepts_from = ['com.plexapp.agents.localmedia', 'com.plexapp.agents.xbmcnfo', 'com.plexapp.agents.opensubtitles', 'com.plexapp.agents.themoviedb']
-    contributes_to = ['com.plexapp.agents.xbmcnfo']
+    contributes_to = ['com.plexapp.agents.xbmcnfo' , 'com.plexapp.agents.themoviedb']
     if Prefs['fallback_agent'] == 'imdb':
         fallback_agent = 'com.plexapp.agents.imdb'
     if Prefs['fallback_agent'] == 'tmdb':
