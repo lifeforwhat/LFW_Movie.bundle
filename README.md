@@ -46,6 +46,8 @@ TMDb 컬렉션
 
 트레일러
 
+구글 DOCS 를 이용해 매칭 시스템 정교화(혹은 수동화 또는 위키화로 부를 수 있을듯)
+
 # 왓챠 쿠키 얻는 법
 
 ![image](https://user-images.githubusercontent.com/59600370/88553501-50d81e00-d060-11ea-9eb1-b0d99f0935b2.png)
