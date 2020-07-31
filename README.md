@@ -3,6 +3,18 @@
 ![image](https://user-images.githubusercontent.com/59600370/88553054-d0192200-d05f-11ea-81b7-569039cfe1c1.png)
 ![1595863356064](https://user-images.githubusercontent.com/59600370/88560154-baf4c100-d068-11ea-9d07-0c20be826cbb.jpg)
 
+# SJ_Daum.bundle 에서 포크
+
+포크하면서 추가한 기능 (2020-07-30 추가)
+
+![image](https://user-images.githubusercontent.com/59600370/89054423-b9dad100-d393-11ea-81ce-ce85c2468a8c.png)
+
+imdb 평점 덮어씌우기
+
+imdb 점수별 컬렉션 생성
+
+fallback 설정
+
 # 기존 SJ_Daum.bundle 과의 차이점
 
 TMDb 컬렉션
