@@ -465,7 +465,7 @@ def updateDaumMovie(cate, metadata):
         root = HTML.ElementFromURL(imdb_url)
         imdb_rating = root.xpath('//*[@id="title-overview-widget"]/div[1]/div[2]/div/div[1]/div[1]/div[1]/strong/span')[0].text_content()
         imdb_people = root.xpath('//*[@id="title-overview-widget"]/div[1]/div[2]/div/div[1]/div[1]/a/span')[0].text_content()
-        if imdb_rating and imdb_people >= int(Prefs['imdb_rating_people_numbers']):
+        if imdb_rating and int(imdb_people) >= int(Prefs['imdb_rating_people_numbers']):
             metadata.rating = float(imdb_rating)
             metadata.rating_image = 'imdb://image.rating'
             if Prefs['imdb_rating_text_and_collection'] != "":
