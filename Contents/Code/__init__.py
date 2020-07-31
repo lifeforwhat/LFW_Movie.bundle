@@ -464,7 +464,8 @@ def updateDaumMovie(cate, metadata):
         imdb_url = 'https://www.imdb.com/title/%s' % imdb_code
         root = HTML.ElementFromURL(imdb_url)
         imdb_rating = root.xpath('//*[@id="title-overview-widget"]/div[1]/div[2]/div/div[1]/div[1]/div[1]/strong/span')[0].text_content()
-        if imdb_rating:
+        imdb_people = root.xpath('//*[@id="title-overview-widget"]/div[1]/div[2]/div/div[1]/div[1]/a/span')[0].text_content()
+        if imdb_rating and imdb_people >= int(Prefs['imdb_rating_people_numbers']):
             metadata.rating = float(imdb_rating)
             metadata.rating_image = 'imdb://image.rating'
             if Prefs['imdb_rating_text_and_collection'] != "":
@@ -476,6 +477,7 @@ def updateDaumMovie(cate, metadata):
                     if float(item[0].split('~')[0]) <= score <= float(item[0].split('~')[1]):
                         metadata.collections.add('🟨 ' + item[1].replace(']','').strip())
                         break
+
 
     # "6.5~7.0[🟨 IMDb 7 ▼],7.1~7.9[🟨 IMDb 7.1~7.9],8.0~9.9[🟨 IMDB 8.0~]"
 
