@@ -93,6 +93,12 @@
 		"default": "false"
 	},
 	{
+		"id": "imdb_rating_people_numbers",
+		"label": "IMDb 점수를 매긴 사람이 이 숫자 이상을 넘지 않는 경우 받아오지 않는다.",
+		"type": "text",
+		"default": "200"
+	},
+	{
 		"id": "imdb_rating_text_and_collection",
 		"label": "imdb 특정 평점 범위마다 컬렉션을 형성해준다. 문법은 기본값 참조. 구분자는 쉼표. 블랭크일 경우 생성하지 않음. 앞에는 자동으로 도형 추가.",
 		"type": "text",
