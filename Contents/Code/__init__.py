@@ -499,7 +499,7 @@ class SJ_DaumMovieAgent(Agent.Movies):
         Log.Info("in update ID = %s" % metadata.id)
         updateDaumMovie('movie', metadata)
 
-
+"""
 class SJ_DaumTvAgent(Agent.TV_Shows):
     name = "LFW Movie"
     primary_provider = True
@@ -517,4 +517,4 @@ class SJ_DaumTvAgent(Agent.TV_Shows):
         updateTV(metadata, media)
         import local_tv_extras
         local_tv_extras.update(metadata, media)
-
+"""
