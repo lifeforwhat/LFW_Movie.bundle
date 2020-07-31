@@ -11,6 +11,9 @@
 
 imdb 평점 덮어씌우기
 
+![image](https://user-images.githubusercontent.com/59600370/89059267-d975f780-d39b-11ea-8355-9158795ce41a.png)
+
+
 imdb 점수별 컬렉션 생성
 
 fallback 설정
