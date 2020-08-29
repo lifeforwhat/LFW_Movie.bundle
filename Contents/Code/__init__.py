@@ -557,6 +557,7 @@ def updateDaumMovie(cate, metadata):
     Log(str(rr))
     for item in result:
         tmp = item['title']
+        if item['dl_url'].count('.flv') > 0 : continue
         if tmp.count('예고편') > 0 :
             # url="lf://cdn.discordapp.com/attachments/748003668212711485/748784552113209384/test.mp4",
             extras.append({'type': 'trailer',
