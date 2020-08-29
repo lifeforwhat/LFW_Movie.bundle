@@ -3,6 +3,15 @@
 ![image](https://user-images.githubusercontent.com/59600370/88553054-d0192200-d05f-11ea-81b7-569039cfe1c1.png)
 ![1595863356064](https://user-images.githubusercontent.com/59600370/88560154-baf4c100-d068-11ea-9d07-0c20be826cbb.jpg)
 
+
+
+# 2020-08-29 메이저 업데이트
+
+![image](https://user-images.githubusercontent.com/59600370/91634137-f6e4c280-ea28-11ea-94d1-f3cfe8bebd54.png)
+![image](https://user-images.githubusercontent.com/59600370/91634142-fa784980-ea28-11ea-9969-d45e77bf67d3.png)
+
+및 잔버그 
+
 # SJ_Daum.bundle 에서 포크
 
 포크하면서 추가한 기능 (2020-07-30 추가)
@@ -35,6 +44,8 @@ TMDb 컬렉션
 네이버 평론가 크롤
 
 평론가 점수가 특정 점수 이하이면 로튼 토마토 표기
+
+링크 기반 예고편 및 부가영상 스트리밍
 
 # TODO
 
