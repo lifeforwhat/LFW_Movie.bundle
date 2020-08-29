@@ -7,6 +7,17 @@ import watcha
 import tmdb
 import naver
 
+# CSV
+"""import csv
+CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSyXWXoEOG5kq97_B7SQ7yitUxtjgATboagj3LVA41zoH7JYAEAZ9-vWSQw9cJNG9tE9xG1r28Q81O0/pub?output=csv'
+import urllib2
+
+response = urllib2.urlopen(CSV_URL)
+cr = csv.reader(response)
+
+for row in cr:
+    Log.Info(str(row))"""
+
 DAUM_MOVIE_SRCH   = "http://movie.daum.net/data/movie/search/v2/%s.json?size=20&start=1&searchText=%s"
 
 DAUM_MOVIE_DETAIL = "http://movie.daum.net/data/movie/movie_info/detail.json?movieId=%s"
@@ -401,8 +412,11 @@ def updateDaumMovie(cate, metadata):
             Log.Info(str(traceback.print_exc))
 
     # 네이버 파트
-    naver_result = naver.search(keyword=metadata.title, year=int(metadata.year))
-    crtics_naver = naver.critics(naver_result['code'])
+    try:
+        naver_result = naver.search(keyword=metadata.title, year=int(metadata.year))
+        crtics_naver = naver.critics(naver_result['code'])
+    except :
+        crtics_naver = []
     for item in crtics_naver:
         # ⭐
         wname = ''
@@ -421,26 +435,151 @@ def updateDaumMovie(cate, metadata):
             meta_review.source = u'네이버'
             Log.Info(str(wtext))
             meta_review.text = '⭐ ' + str(wimage) + ' | ' + wtext.replace('<' ,'〈').replace('>','〉')
-            meta_review.link = 'https://www.watcha.com/'
+            meta_review.link = 'https://www.naver.com/'
             if float(wimage) >= float(Prefs['thresh_hold_point']):
                 meta_review.image = 'rottentomatoes://image.review.fresh'
             else:
                 meta_review.image = 'rottentomatoes://image.review.rotten'
 
-    # Trailer 작동 잘 안 된다.
-    """extras = []
-    extras.append({'type': 'primary_trailer',
-               'lang': "KO",
-               'extra': TrailerObject(
-                   url="http://cdn.videofarm.daum.net/vod/v3162VZTJJCCDo7JCnmFTF7/mp4_1280_720_2M/movie.mp4?px-bps=5661921&px-bufahead=10&px-time=1596103735&px-hash=fc809da355acd1f0d9012e7f24652614",
-                   title='test',
-                   year=2017,
-                   thumb='')})
+    # Trailer Daum 기반
+    extras = []
+    Log('다음 부가영상을 찾습니다.' + str(metadata.id))
+
+
+    code = str(metadata.id)
+    #video_res = HTTP.Request('https://movie.daum.net/moviedb/video?id=' + code)
+    root = HTML.ElementFromURL('https://movie.daum.net/moviedb/video?id=' + code)
+    #tags = root.xpath('//*[@id="vclipListUl"]/li')
+
+    """for tag in tags:
+        local_code = tag.xpath('a[@class="link_video"]').attrib['href']
+        local_code = re.findall('\d+' , local_code)[0]
+        thumb = tag.xpath('img[@class="thumb_video"]')[0].attrib['src']
+        duration = tag.xpath('span[@class="num_playtime"]')[0].text_content().split(':')
+        duration = float(duration[0])*60 + float(duration[1])
+        title = tag.xpath('strong[@class="tit_video"]')[0].text_content().strip()
+        #suburl = "https://movie.daum.net/moviedb/videolist?id=" + code + "&vclipId=&mainVclipId=" + local_code + "&page=" + str(i)
+        #subRoot = HTML.ElementFromURL(suburl)
+        video_list.append({'code' : local_code , 'title' : title,'thumb' : thumb , 'duration' : duration})"""
+
+    result = []
+    tmps = root.xpath('//meta')
+    for tmp in tmps:
+        vclip = False
+        try:vclip = tmp.attrib['content']
+        except:continue
+        Log("vclip")
+        Log(str(vclip))
+        vclip = re.findall('vclipId=\d+' , vclip)
+        if len(vclip) > 0 : # 발견
+            break
+
+    if vclip:
+        vclipid = vclip[0].replace('vclipId=' , '').strip()
+        for i in range(5):
+            Log('page is %s' % str(i))
+            url = "https://movie.daum.net/moviedb/videolist?id=" + str(metadata.id) + "&vclipId=&mainVclipId=" + vclipid + "&page=" + str(i)
+            root = HTML.ElementFromURL(url)
+            #items = root.xpath('//*[@id="vclipListUl"]/li')
+            items = root.xpath('//li')
+            Log('videos!!')
+            Log(items)
+            for item in items: # 각 페이지마다 있는 동영상들이 item임
+                #tmp = item.xpath('//img[@class="thumb_video"]')[0]
+                tmp = item.xpath('a/span/img')[0]
+                thumb = tmp.attrib['src'].replace('//','http://')
+                title = tmp.attrib['alt'].strip()
+                Log('Title : %s' % title)
+                try:
+                    duration = item.xpath('//span[@class="num_playtime"]')[0].text_content().strip().split(':')
+                    duration = float(duration[0]) * 60 + float(duration[1])
+                except:
+                    duration = 60
+                code = item.xpath('a')[0].attrib['href']
+                code = re.findall('\d+' , code)[0]
+                # url = "https://movie.daum.net/moviedb/video?id=" + code + "&vclipId=" + id
+                url = "https://movie.daum.net/moviedb/video?id=" + str(metadata.id) + "&vclipId=" + code
+                sub_root = HTML.ElementFromURL(url)
+                m_items = sub_root.xpath('//meta')
+                tmp_code = False
+                for m in m_items:
+                    if 'content' in m.attrib and m.attrib['content'].count('tvpot/thumb/') > 0 : # http://t1.daumcdn.net/tvpot/thumb/ZiXvxfqFb5k$/thumb.jpg
+                        tmp_code = m.attrib['content']#.replace('http://t1.daumcdn.net/tvpot/thumb/' ,'').replace('/thumb.jpg' , '')
+                        Log('tmp_code')
+
+                        tmp_code = re.findall('thumb/[\w\d!@#$%^&*\(\)\-\_\+\=]+/thumb' , tmp_code)[0].replace('thumb/','').replace('/thumb' ,'').strip()
+                        Log(tmp_code)
+                        break
+                if tmp_code == False:
+                    scripts = sub_root.xpath('//*[@id="dkContent"]/script')
+                    for script in scripts:
+                        Log('Script : %s' % str(script))
+                        #Log(script.text_content())
+                        # getPlayerIframeSrc('v4573TSSjqC1TrRSSqMFORp'))
+                        codes = re.findall('''getPlayerIframeSrc\('[\w\d!@#$%^&*\(\)\-\_\+\=]+'\)\)''' , script.text_content())
+                        if len(codes) > 0 :
+                            tmp_code = codes[0].replace('getPlayerIframeSrc','').replace('(' ,'').replace(')','').replace("'","").strip()
+                Log('tmp_code')
+                Log(tmp_code)
+                if tmp_code:
+                    url = "https://kakaotv.daum.net/api/v3/ft/cliplinks/" + tmp_code + "@my/raw?player=monet_html5&referer=https%3A%2F%2Fmovie.daum.net%2Fmoviedb%2Fvideo%3Fid%3D61057&uuid=04015a3d236af68de4dbbc65633271a1&service=daum_movie&section=daum_movie&fields=seekUrl,abrVideoLocationList&playerVersion=3.1.4&tid=8314690bf37da0eb3722e43c26c205bc&profile=HIGH4&dteType=PC&continuousPlay=false&contentType="
+                    try:
+                        j = JSON.ObjectFromURL(url)
+                        if j['videoLocation']['profile'] != u'HIGH4':raise ValueError
+                    except:
+                        url = "https://kakaotv.daum.net/api/v3/ft/cliplinks/" + tmp_code + "@my/raw?player=monet_html5&referer=https%3A%2F%2Fmovie.daum.net%2Fmoviedb%2Fvideo%3Fid%3D61057&uuid=04015a3d236af68de4dbbc65633271a1&service=daum_movie&section=daum_movie&fields=seekUrl,abrVideoLocationList&playerVersion=3.1.4&tid=8314690bf37da0eb3722e43c26c205bc&profile=HIGH&dteType=PC&continuousPlay=false&contentType="
+                        try:
+                            j = JSON.ObjectFromURL(url)
+                            if j['videoLocation']['profile'] != u'HIGH': raise ValueError
+                        except:
+                            url = "https://kakaotv.daum.net/api/v3/ft/cliplinks/" + tmp_code + "@my/raw?player=monet_html5&referer=https%3A%2F%2Fmovie.daum.net%2Fmoviedb%2Fvideo%3Fid%3D61057&uuid=04015a3d236af68de4dbbc65633271a1&service=daum_movie&section=daum_movie&fields=seekUrl,abrVideoLocationList&playerVersion=3.1.4&tid=8314690bf37da0eb3722e43c26c205bc&profile=MAIN&dteType=PC&continuousPlay=false&contentType="
+                            try:
+                                j = JSON.ObjectFromURL(url)
+                            except:
+                                continue
+                    dl_url = j['videoLocation']['url']
+                    result.append({'title' : title , 'thumb' : thumb , 'duration' : int(duration) , 'code' : tmp_code , 'dl_url' : dl_url})
+    #for video_url in video_list:
+
+    #video_list = re.findall('vclipId=\d+' , video_res.text_content())
+
+
+    """TYPE_MAP = {'primary_trailer': TrailerObject,
+                'trailer': TrailerObject,
+                'interview': InterviewObject,
+                'behind_the_scenes': BehindTheScenesObject,
+                'scene_or_sample': SceneOrSampleObject}"""
+    Log(str(result))
+    rr = []
+    for item in result:
+        if item not in rr:rr.append(item)
+    result = rr
+    Log(str(rr))
+    for item in result:
+        tmp = item['title']
+        if tmp.count('예고편') > 0 :
+            # url="lf://cdn.discordapp.com/attachments/748003668212711485/748784552113209384/test.mp4",
+            extras.append({'type': 'trailer',
+                       'lang': "ko",
+                       'extra': TrailerObject(
+                           url = 'lf://' + item['dl_url'].replace('https://',''),
+                           title=item['title'],
+                           duration=item['duration'],
+                           thumb=item['thumb'])})
+        else:
+            extras.append({'type': 'behind_the_scenes',
+                       'lang': "ko",
+                       'extra': BehindTheScenesObject(
+                           url = 'lf://' + item['dl_url'].replace('https://',''),
+                           title=item['title'],
+                           duration=item['duration'],
+                           thumb=item['thumb'])})
+
     for extra in extras:
-        metadata.extras.add(extra['extra'])"""
+        metadata.extras.add(extra['extra'])
 
     # IMDb 파트
-    if Prefs['imdb_rating'] == True:
+    if Prefs['imdb_rating'] == True and metadata.original_title != None:
         q = metadata.original_title.strip() if metadata.original_title.count(',') == 0 else metadata.original_title.split(',')[0].strip()
         year = metadata.year
         # https://v2.sg.media-imdb.com/suggestion/p/peninsula.json
